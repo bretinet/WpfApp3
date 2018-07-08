@@ -60,13 +60,72 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ComparePatterns.cs" />
+    <Compile Include="ModifyFilesWindow.xaml.cs">
+      <DependentUpon>ModifyFilesWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="User Controls\ComparePatternsUserControl.xaml.cs">
+      <DependentUpon>ComparePatternsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="ConfigurationForm.xaml.cs">
+      <DependentUpon>ConfigurationForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\FileNameExtension.cs" />
+    <Compile Include="FileCreationWindow.xaml.cs">
+      <DependentUpon>FileCreationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FilePatternConfiguration.cs" />
+    <Compile Include="User Controls\FilePatternUserControl.xaml.cs">
+      <DependentUpon>FilePatternUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FilePatternWindow.xaml.cs">
+      <DependentUpon>FilePatternWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FolderInformation.cs" />
+    <Compile Include="FolderPatternWindow.xaml.cs">
+      <DependentUpon>FolderPatternWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PatternValidation.cs" />
+    <Compile Include="Persistence.cs" />
     <Compile Include="SourceCodeFile.cs" />
+    <Compile Include="User Controls\FilterFolderUserControl.xaml.cs">
+      <DependentUpon>FilterFolderUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>
     </Compile>
     <Compile Include="Window2.xaml.cs">
       <DependentUpon>Window2.xaml</DependentUpon>
     </Compile>
+    <Page Include="ModifyFilesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="User Controls\ComparePatternsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ConfigurationForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FileCreationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="User Controls\FilePatternUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FilePatternWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FolderPatternWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -79,6 +138,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="User Controls\FilterFolderUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Window1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

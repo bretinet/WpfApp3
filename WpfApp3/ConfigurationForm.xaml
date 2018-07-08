@@ -1,0 +1,40 @@
+﻿<Window x:Class="WpfApp3.ConfigurationForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp3"
+        mc:Ignorable="d"
+        Title="ConfigurationForm" Height="450" Width="800" Background="#FF2E2E2E">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="20"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="Open"></MenuItem>
+                <MenuItem Header="Save"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="Exit"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <Button Height="40" Name="FilePatternButton" Content="ContentControl" Click="FilePatternButton_Click" Background="Transparent" Foreground="White" FontSize="14"></Button>
+                <Button Height="40" Name="FolderPatterButton" Content="Folder Pattern" Click="FolderPatterButton_Click"></Button>
+                <Button Height="40" Name="ComparePatternButton" Content="Compare Patterns" Click="ComparePatternButton_OnClick" Background="Transparent" FontSize="14" Foreground="White"></Button>
+            </StackPanel>
+           
+            <ContentControl Grid.Column="1" Name="ContentControl1" Background="Black">
+
+            </ContentControl>
+        </Grid>
+
+    </Grid>
+</Window>

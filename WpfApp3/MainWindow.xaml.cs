@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
+using System.Security.Authentication;
+using System.Security.Permissions;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +22,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using WpfApp3.Extensions;
 using Path = System.IO.Path;
 
 namespace WpfApp3
@@ -25,6 +32,9 @@ namespace WpfApp3
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string DefaultConfigFile = "DefaultConfig.Config";
+        private readonly SynchronizationContext synchronizationContext;
+
         public IEnumerable<string> PatternList { get; set; }
         private SourceCodeFile sourceCodeFile;
 
@@ -34,7 +44,7 @@ namespace WpfApp3
             //Probe..Initialize(this);
 
             //Probe.CanContentScroll = false;
-
+            synchronizationContext = SynchronizationContext.Current;
 
             SearchFolder = String.Empty;
             sourceCodeFile = new SourceCodeFile();
@@ -61,47 +71,46 @@ namespace WpfApp3
             if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 SearchFolder = folderDialog.FileName;
-                TxtFolder.Text = SearchFolder;
-
-
+                RootFolderTextBox.Text = SearchFolder;
             }
         }
 
         private void GetFilesButton_Click(object sender, RoutedEventArgs e)
         {
-            //FilesListBox.Items.Clear();
-            _bretinet.Clear();
+            fileNameList.Clear();
             ItemsCounter = default(int);
-            IncludeSubFolders = SubFoldersCheckBox.IsChecked ?? true;
+
+            IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? true;
+
             TotalFilesLabel.Content = " - -";
-            //var directory = new System.IO.DirectoryInfo(SearchFolder);
-            //var fff = sss.GetFiles();
+            PatternList = GetFilters();
 
-            //foreach (var fileInfo in fff)
-            //{
-            //    FilesListBox.Items.Add(fileInfo.Name);
-            //}
+            Task.Factory.StartNew(() =>
+            {
+                GetFoldersAndFiles(string.Empty);
+            }).ContinueWith(ss =>
+            {
+                FilesListBox.ItemsSource = null;
+                FilesListBox.ItemsSource = fileNameList;
+                TotalFilesLabel.Content = ItemsCounter.ToString();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
 
-            PatternList = GetPatterns();
-            GetFoldersAndFiles(string.Empty);
-
-            FilesListBox.ItemsSource = null;
-            FilesListBox.ItemsSource = _bretinet;
-            TotalFilesLabel.Content = ItemsCounter.ToString();
+            Configuration.Instance.SelectedFiles = fileNameList;
         }
 
         public int ItemsCounter { get; set; }
         public bool IncludeSubFolders { get; set; } = true;
 
-        private IEnumerable<string> GetPatterns()
+        private IEnumerable<string> GetFilters()
         {
             var patterns = new List<string>();
-            if (string.IsNullOrWhiteSpace(PatternTextBox.Text))
+
+            if (string.IsNullOrWhiteSpace(FilterPatternTextBox.Text))
             {
                 return new List<string> { "*" };
             }
 
-            var patternList = PatternTextBox.Text.Split(new char[] { ',', ';' });
+            var patternList = FilterPatternTextBox.Text.Split(new char[] { ',', ';' });
 
             foreach (var pattern in patternList)
             {
@@ -110,7 +119,7 @@ namespace WpfApp3
             return patterns;
         }
 
-        private readonly List<string> _bretinet = new List<string>();
+        private readonly List<string> fileNameList = new List<string>();
         public void GetFoldersAndFiles(string directory)
         {
             var currentDirectory = Path.Combine(SearchFolder, directory);
@@ -119,42 +128,96 @@ namespace WpfApp3
             //var pattern = string.IsNullOrEmpty(PatternTextBox.Text) ? "*" : PatternTextBox.Text;
             //var files = directoryInfo.GetFiles(pattern, searchOption: SearchOption.TopDirectoryOnly);
 
-            var sss = new List<string>();
+            var filesInFolder = new List<string>();
 
             foreach (var pattern2 in PatternList)
             {
-
-                var files = directoryInfo.GetFiles(pattern2, searchOption: SearchOption.TopDirectoryOnly);
-                foreach (var fileInfo in files)
+                try
                 {
-                    if (!string.IsNullOrEmpty(fileInfo.Name))
+                    var folderInformation = new FolderInformation();
+                    var ttt = folderInformation.IsFolderAccessible(currentDirectory, FileSystemRights.Traverse);
+                    var exist = System.IO.Directory.Exists(currentDirectory);
+                    var files = directoryInfo.GetFiles(pattern2, SearchOption.TopDirectoryOnly);
+                    foreach (var fileInfo in files)
                     {
-                        var fullPathName = Path.Combine(directory, fileInfo.Name);
-                        if (!FilesListBox.Items.Contains(fullPathName))
+                        if (!string.IsNullOrEmpty(fileInfo.Name))
                         {
-                            //FilesListBox.Items.Add(fullPathName);
-                            //ItemsCounter++;
-                            sss.Add(fullPathName);
-                        }
+                            var fullPathName = Path.Combine(directory, fileInfo.Name);
+                            if (!FilesListBox.Items.Contains(fullPathName))
+                            {
+                                filesInFolder.Add(fullPathName);
+                            }
 
+                        }
                     }
                 }
-            }
-            _bretinet.AddRange(sss.OrderBy(z => z));
-            ItemsCounter += sss.Count;
-
-
-            if (IncludeSubFolders)
-            {
-                var subdirectories = directoryInfo.GetDirectories();
-                foreach (var folder in subdirectories)
+                catch (System.Security.SecurityException ex)
                 {
-                    var currentFolder = Path.Combine(directory, folder.Name);
+                    Debug.WriteLine("Error reading the file" + ex.Message);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Debug.WriteLine("Error reading the file" + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Error reading the file" + ex.Message);
+                }
 
-                    GetFoldersAndFiles(currentFolder);
+
+            }
+
+            fileNameList.AddRange(filesInFolder.OrderBy(name => name));
+            ItemsCounter += filesInFolder.Count;
+            //TotalFilesLabel.Content = ItemsCounter.ToString();
+
+            synchronizationContext.Post(new SendOrPostCallback(o =>
+            {
+                TotalFilesLabel.Content = (int)o;
+            }), ItemsCounter);
+
+            try
+            {
+                if (IncludeSubFolders)
+                {
+                    //var ss = Directory.GetAccessControl(currentDirectory, AccessControlSections.Access);
+
+                    //var ffff = ss.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+                    //var sss = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+                    ////var ttt = ffff.Cast<AuthorizationRule>().ToList().Where(x=>x.IdentityReference.Value.Equals(sss));
+                    //var yyy = ffff.Cast<FileSystemAccessRule>().ToList().Where(x => x.IdentityReference.Value.Equals(sss)).ToList();
+
+                    //if (yyy.Any() && (yyy.First().FileSystemRights & FileSystemRights.Read) > 0)
+                    //{
+
+                    var subdirectories = directoryInfo.GetDirectories();
+                    foreach (var folder in subdirectories)
+                    {
+                        var currentDirectory2 = Path.Combine(SearchFolder, directory);
+                        var currentFolder = Path.Combine(currentDirectory2, folder.Name);
+                        var fff = new FolderInformation();
+                        if (fff.IsFolderAccessible(currentFolder, FileSystemRights.Read))
+                        {
+                            GetFoldersAndFiles(currentFolder);
+                        }
+                        else
+                        {
+                            Debug.WriteLine("You don't have access to" + currentDirectory);
+                        }
+                    }
+                    // if (ttt.Any() && ttt.First().)
+                    //FileIOPermission
+                    //var ggg = new FileIOPermission(FileIOPermissionAccess.Read, currentDirectory);
+
 
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error reading the folder: " + ex.Message);
+            }
+
+
 
         }
 
@@ -164,24 +227,32 @@ namespace WpfApp3
             {
                 return;
             }
-            string ff = FilesListBox.SelectedItem.ToString();
+            string fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
             //MessageBox.Show(FilesListBox.SelectedItem.ToString());
             try
             {
-                if (FilesListBox.SelectedItem.ToString().EndsWith(" (False)"))
-                {
-                    ff = ff.Replace(" (False)","");
-                }
-                if (FilesListBox.SelectedItem.ToString().EndsWith(" (True)"))
-                {
-                    ff = ff.Replace(" (True)", "");
-                }
+                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (False)"))
+                //{
+                //    ff = ff.Replace(" (False)", "");
+                //}
+                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (True)"))
+                //{
+                //    ff = ff.Replace(" (True)", "");
+                //}
 
-                var ppp = new System.IO.FileInfo(System.IO.Path.Combine(SearchFolder, ff));
+                var path = new FileInfo(Path.Combine(SearchFolder, fileName));
 
-                var dddd = ppp.OpenText().ReadToEnd();
                 FileTextBox.Clear();
-                FileTextBox.Text = dddd;
+                Task<string> file = path.OpenText().ReadToEndAsync();
+                file.ContinueWith((s) =>
+                {
+                    FileTextBox.Text = file.Result;
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+
+
+
+
+
             }
             catch (Exception exception)
             {
@@ -193,7 +264,7 @@ namespace WpfApp3
         private void NewWindowButton_Click(object sender, RoutedEventArgs e)
         {
             Window1 window1 = new Window1();
-            window1.Probe = _bretinet;
+            window1.Probe = fileNameList;
             window1.Show();
 
 
@@ -224,32 +295,143 @@ namespace WpfApp3
             //    ;
 
             //}
-
+            var CompareFilePath = "Compare.bin";
 
 
             try
             {
 
-                for (int i = 0; i < _bretinet.Count; i++)
+                var persistence = new Persistence<List<ComparePatterns>>();
+                var comparerPatterns = persistence.GetConfigurationValues(CompareFilePath);
+
+                if (comparerPatterns == null || !comparerPatterns.Any())
                 {
-                    var ppp = new System.IO.FileInfo(System.IO.Path.Combine(SearchFolder, _bretinet[i]));
+                    return;
+                }
 
-                    var dddd = ppp.OpenText().ReadToEnd();
+                for (var i = 0; i < fileNameList.Count; i++)
+                {
+                    var fileName = fileNameList[i].CleanFileName();
+                    fileNameList[i] = fileName;
 
-                    var ss = Regex.Match(dddd, "html");
+                    var path = new FileInfo(Path.Combine(SearchFolder, fileName));
 
-                    //MatchLabel.Content = ss.Success.ToString();
+                    var text = path.OpenText().ReadToEndAsync().Result;
 
-                    _bretinet[i] = _bretinet[i] + " (" + ss.Success + ")";
+
+                    var validation = new PatternValidation();
+                    foreach (var pattern in comparerPatterns)
+                    {
+                        if (!pattern.Active) continue;
+
+                        string patternValue;
+                        if (pattern.Negate)
+                        {
+                            patternValue = $"^({pattern.Pattern})";
+                        }
+                        else
+                        {
+                            patternValue = pattern.Pattern;
+                        }
+                        RegexOptions options = pattern.Case ? RegexOptions.IgnoreCase : RegexOptions.None;
+
+
+                        var isMatching = validation.IsMatchingPattern(patternValue, text, options);
+
+                        fileNameList[i] = $"{fileNameList[i]} ({isMatching})";
+                    } 
                 }
 
                 FilesListBox.ItemsSource = null;
-                FilesListBox.ItemsSource = _bretinet;
+                FilesListBox.ItemsSource = fileNameList;
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
             }
+
+   
+
+
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new ConfigurationForm();
+            window.Show();
+        }
+
+        private void MenuItem_OnChecked(object sender, RoutedEventArgs e)
+        {
+            //if (FilesListBox != null)
+            //{
+            //    FilesListBox.Visibility = Visibility.Visible;
+            //    FilesGridSplitter.Visibility = Visibility.Visible;
+            //}
+        }
+
+        private void FileListMenuItem_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            //((FilesListBox.Parent as ScrollViewer).Parent as DataGridRow).Visibility = Visibility.Collapsed;
+            //(FilesGridSplitter.Parent as DataGridRow).Visibility = Visibility.Collapsed;
+            ////(MessageListBox.Parent as Grid).
+        }
+
+        private void ExitMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var result = MessageBox.Show("Do you want to close the application?", "Close the application", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Application.Current.Shutdown(0);
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private void FilesCreatorButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            FileCreationWindow sss = new FileCreationWindow();
+            sss.Show();
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            var persistence = new Persistence<FilePatternConfiguration>();
+
+            var configuration = persistence.GetConfigurationValues(DefaultConfigFile);
+            if (configuration != null)
+            {
+                SearchFolder = configuration.DefaultFolder;
+                RootFolderTextBox.Text = SearchFolder;
+                FilterPatternTextBox.Text = configuration.DefaultFilterPattern;
+                UrlBaseAddressTextBox.Text = configuration.DefaultUrl;
+                IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
+
+            }
+        }
+
+        private void ModificationWindowMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            var fileConfiguration = new FilePatternConfiguration
+            {
+                DefaultFolder = RootFolderTextBox.Text,
+                DefaultFilterPattern = FilterPatternTextBox.Text,
+                DefaultUrl = UrlBaseAddressTextBox.Text,
+                IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
+            };
+
+            Configuration.Instance.FileConfiguration = fileConfiguration;
+
+            var window = new ModifyFilesWindow();
+            window.Show();
         }
     }
 }
