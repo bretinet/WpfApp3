@@ -5,16 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp3"
         mc:Ignorable="d"
-        Title="Window2" Height="450" Width="800">
+        Title="Window2" Height="450" Width="800" Activated="Window_Activated">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="5"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid>
-            
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="Pattern"></Label>
+            <TextBox Grid.Row="0" Grid.Column="1" Name="PatternTextBox"></TextBox>
+            <Label Grid.Row="1" Grid.Column="0" Content="Value"></Label>
+            <ComboBox Grid.Row="1" Grid.Column="1" Name="ValueComboBox">
+                <ComboBoxItem Content="False"  ></ComboBoxItem>
+                <ComboBoxItem Content="True"></ComboBoxItem>
+                <ComboBoxItem Content="Warning"></ComboBoxItem>
+            </ComboBox>
+            <Button Grid.Row="2" Grid.Column="0" Content="Delete" Click="Button_Click_1"></Button>
+            <Button Grid.Row="2" Grid.Column="1" Content="Insert" Click="Button_Click"></Button>
         </Grid>
-        <Button Content="Close"></Button>
+        <GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" Background="Black"></GridSplitter>
+        <DataGrid Grid.Row="2" Name="PatternsDataGrid">
+
+        </DataGrid>
     </Grid>
 </Window>
