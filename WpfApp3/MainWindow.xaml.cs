@@ -130,14 +130,16 @@ namespace WpfApp3
 
             var filesInFolder = new List<string>();
 
-            foreach (var pattern2 in PatternList)
+            foreach (var filterPattern in PatternList)
             {
                 try
                 {
                     var folderInformation = new FolderInformation();
-                    var ttt = folderInformation.IsFolderAccessible(currentDirectory, FileSystemRights.Traverse);
-                    var exist = System.IO.Directory.Exists(currentDirectory);
-                    var files = directoryInfo.GetFiles(pattern2, SearchOption.TopDirectoryOnly);
+                    //var ttt = folderInformation.IsFolderAccessible(currentDirectory, FileSystemRights.Traverse);
+                    //var exist = System.IO.Directory.Exists(currentDirectory);
+                    var fffilter = new Regex("^"+ filterPattern +"$");
+
+                    var files = directoryInfo.GetFiles("*", SearchOption.TopDirectoryOnly).Where(x => fffilter.Match(x.Name).Success);
                     foreach (var fileInfo in files)
                     {
                         if (!string.IsNullOrEmpty(fileInfo.Name))
@@ -196,14 +198,17 @@ namespace WpfApp3
                         var currentDirectory2 = Path.Combine(SearchFolder, directory);
                         var currentFolder = Path.Combine(currentDirectory2, folder.Name);
                         var fff = new FolderInformation();
-                        if (fff.IsFolderAccessible(currentFolder, FileSystemRights.Read))
+                        //if (fff.IsFolderAccessible(currentFolder, FileSystemRights.Read))
                         {
+                            var ff = new Regex("(?i:backup)");
+                            var tt = ff.Match(folder.Name).Success;
+                            if (!tt)
                             GetFoldersAndFiles(currentFolder);
                         }
-                        else
-                        {
-                            Debug.WriteLine("You don't have access to" + currentDirectory);
-                        }
+                        //else
+                        //{
+                        //    Debug.WriteLine("You don't have access to" + currentDirectory);
+                        //}
                     }
                     // if (ttt.Any() && ttt.First().)
                     //FileIOPermission
@@ -432,6 +437,30 @@ namespace WpfApp3
 
             var window = new ModifyFilesWindow();
             window.Show();
+        }
+        bool NewList = false;
+        private void FilterListButton_Click(object sender, RoutedEventArgs e)
+        {
+            var tt = new List<string>();
+            if (!NewList)
+            {
+                foreach (var item in fileNameList)
+                {
+                    if (item.Contains (" (True)"))
+                    {
+                        tt.Add(item);
+                    }
+                }
+
+                FilesListBox.ItemsSource = tt;
+
+            }
+            else
+            {
+                FilesListBox.ItemsSource = null;
+                FilesListBox.ItemsSource = fileNameList;
+            }
+            NewList = !NewList;
         }
     }
 }

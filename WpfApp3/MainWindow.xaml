@@ -76,11 +76,13 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Name="BtnStart" Content="Get Files" Click="GetFilesButton_Click" Height="20" VerticalAlignment="Bottom"></Button>
                         <Button Grid.Column="1" Content="Compare for pattens" Click="ComparePatternsButton_Click"></Button>
                         <Button Grid.Column="2" Name="NewWindowButton" Content="Test URL Pages" Click="NewWindowButton_Click"></Button>
                         <Button Grid.Column="3" Content="Files Creator" Name="FilesCreatorButton" Click="FilesCreatorButton_OnClick"></Button>
+                        <Button Grid.Column="5" Content="Filter" Name="FilterListButton" Click="FilterListButton_Click"></Button>
                     </Grid>
                     <Grid Grid.Row="2">
                         <Grid>
