@@ -78,7 +78,7 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Name="BtnStart" Content="Get Files" Click="GetFilesButton_Click" Height="20" VerticalAlignment="Bottom"></Button>
+                        <Button Grid.Column="0" Name="BtnStart" Content="Get Files" Click="GetFilesButton_Click" Margin="0,0,0.2,0"/>
                         <Button Grid.Column="1" Content="Compare for pattens" Click="ComparePatternsButton_Click"></Button>
                         <Button Grid.Column="2" Name="NewWindowButton" Content="Test URL Pages" Click="NewWindowButton_Click"></Button>
                         <Button Grid.Column="3" Content="Files Creator" Name="FilesCreatorButton" Click="FilesCreatorButton_OnClick"></Button>

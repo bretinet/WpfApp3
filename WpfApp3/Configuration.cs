@@ -24,6 +24,8 @@ namespace WpfApp3
 
         public List<string> SelectedFiles { get; set; }
 
+        public List<string> UrlFiles { get; set; }
+
         public FilePatternConfiguration FileConfiguration { get; set; }
 
         public FilePatternConfiguration DefaultFileConfiguration { get; set; }

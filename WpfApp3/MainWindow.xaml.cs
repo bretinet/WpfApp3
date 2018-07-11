@@ -77,6 +77,14 @@ namespace WpfApp3
 
         private void GetFilesButton_Click(object sender, RoutedEventArgs e)
         {
+            Configuration.Instance.FileConfiguration = new FilePatternConfiguration
+            {
+                DefaultFolder = RootFolderTextBox.Text,
+                DefaultFilterPattern = FilterPatternTextBox.Text,
+                DefaultUrl = UrlBaseAddressTextBox.Text,
+                IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
+            };
+
             fileNameList.Clear();
             ItemsCounter = default(int);
 
@@ -269,7 +277,7 @@ namespace WpfApp3
         private void NewWindowButton_Click(object sender, RoutedEventArgs e)
         {
             Window1 window1 = new Window1();
-            window1.Probe = fileNameList;
+            //window1.Probe = fileNameList;
             window1.Show();
 
 

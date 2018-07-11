@@ -26,11 +26,13 @@ namespace WpfApp3
             InitializeComponent();
 
             SelectedFiles = Configuration.Instance.SelectedFiles;
+
+            ModificationFilesList.ItemsSource = SelectedFiles;
         }
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            ModificationFilesList.ItemsSource = SelectedFiles;
+
 
         }
 
@@ -66,9 +68,9 @@ namespace WpfApp3
                     OriginalFileTextBox.Text = file.Result;
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                var ss = file.Result;
+                var fileResult = file.Result;
 
-                ModifiedFileTextBox.Text = $"<!--#include secureFile.asp-->\n{ss}";
+                ModifiedFileTextBox.Text = $"<!-- #include file=\"permprefixNew.asp\"-->\n{fileResult}";
 
 
 
@@ -83,16 +85,48 @@ namespace WpfApp3
         private void ExecuteButton_OnClick(object sender, RoutedEventArgs e)
         {
             var rootFolder = Configuration.Instance.FileConfiguration.DefaultFolder;
-            
+
             var writer = new StreamWriter("log.txt");
+            FileInfo path;
             for (var i = 0; i < SelectedFiles.Count; i++)
             {
                 var fileName = SelectedFiles[i];
-                var path = new FileInfo(Path.Combine(rootFolder, fileName));
-                
+
+                var pahtWithoutRoot = fileName.Replace(Configuration.Instance.FileConfiguration.DefaultFolder, "");
+
+                var fff = pahtWithoutRoot.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
+
+                path = new FileInfo(Path.Combine(rootFolder, fileName));
+
                 WriteInformationInLog(writer, path.FullName, "SUCCESS");
 
-                File.Copy(path.FullName, "D:\\Backy\\"+fileName,true);
+                var rootBackup = @"C:\Users\E081138\Documents\TempBackup";
+                if (fff.ToList().Count > 1)
+                {
+                    string currentPath = rootBackup;
+                    while (fff.ToList().Count > 1)
+                    {
+                        System.
+                    }
+                }
+                
+                try
+                {
+                    if (!System.IO.Directory.Exists(rootBackup))
+                    {
+                        System.IO.Directory.CreateDirectory(rootBackup);
+                    }
+                    File.Copy(path.FullName, Path.Combine( rootBackup,  fileName), true);
+                }
+                catch (Exception ex)
+                {
+                    WriteInformationInLog(writer, path.FullName, "ERROR COPYING");
+                    MessageBox.Show("Error copying the file:" + path.FullName + Environment.NewLine + ex.Message);
+                }
+
+
+
+
             }
             writer.Flush();
             writer.Close();
@@ -102,7 +136,7 @@ namespace WpfApp3
 
         private void WriteInformationInLog(StreamWriter streamWriter, string text, string result)
         {
-            
+
 
             var ss = new StringBuilder();
             ss.Append(DateTime.Now);
@@ -116,7 +150,7 @@ namespace WpfApp3
             ss.Append("Route");
 
             streamWriter.WriteLine(ss.ToString());
-            
+
         }
     }
 }
