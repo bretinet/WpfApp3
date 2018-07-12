@@ -65,6 +65,8 @@ namespace WpfApp3
         Dictionary<string, Container> dictionary = new Dictionary<string, Container>();
         private void GetWebPages()
         {
+            dictionary.Clear();
+
             var defaultFolder = Configuration.Instance.FileConfiguration.DefaultFolder.Replace("\\", "/");
 
             var ssss = new System.Text.RegularExpressions.Regex("id=\"frmLogon\"");
@@ -153,7 +155,10 @@ namespace WpfApp3
         private void ItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var defaultFolder = Configuration.Instance.FileConfiguration.DefaultFolder.Replace("\\", "/");
-            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+            var selectedItem2 = ItemsListBox.SelectedItem;
+            if (selectedItem2 == null) return;
+
+            var selectedItem = selectedItem2?.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
             if (dictionary.ContainsKey(selectedItem))
             {
                 Container container;
@@ -189,26 +194,41 @@ namespace WpfApp3
             //Configuration.Instance.UrlFiles = items;
             //ItemsListBox.ItemsSource = null;
             //ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
+            var tempList = Configuration.Instance.UrlFiles;
 
-            for (var i = 0; i < Configuration.Instance.UrlFiles.Count; i++)
+            for (var i = 0; i < tempList.Count; i++)
             {
-                var t = Configuration.Instance.UrlFiles[i];
+                var item = tempList[i];
 
-                if (dictionary.ContainsKey(t))
+                if (dictionary.ContainsKey(item))
                 {
-                    var v = dictionary[t].result;
+                    var v = dictionary[item].result;
 
                     if (v)
                     {
-                        Configuration.Instance.UrlFiles[i] = Configuration.Instance.UrlFiles[i] + " (True)";
+                        tempList[i] = tempList[i] + " (True)";
+
+                        //var vv = dictionary[item].message;
+
+                        //if (vv.Content.ReadAsStringAsync().Result.Contains("id=\"frmLogon\""))
+                        //{
+
+                        //    tempList[i] = tempList[i] + " (True)";
+
+                        //}
+                        //else
+                        //{
+                        //    tempList[i] = tempList[i] + " (False)";
+                        //}
                     }
                     else
                     {
-                        Configuration.Instance.UrlFiles[i] = Configuration.Instance.UrlFiles[i] + " (False)";
+                        tempList[i] = tempList[i] + " (False)";
                     }
                 }
             }
 
+            Configuration.Instance.UrlFiles = tempList;
             ItemsListBox.ItemsSource = null;
             ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
         }

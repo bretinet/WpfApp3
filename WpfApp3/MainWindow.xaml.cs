@@ -95,7 +95,7 @@ namespace WpfApp3
 
             Task.Factory.StartNew(() =>
             {
-                GetFoldersAndFiles(string.Empty);
+                GetFoldersAndFiles(SearchFolder);
             }).ContinueWith(ss =>
             {
                 FilesListBox.ItemsSource = null;
@@ -210,7 +210,7 @@ namespace WpfApp3
                         {
                             var ff = new Regex("(?i:backup)");
                             var tt = ff.Match(folder.Name).Success;
-                            if (!tt & !folder.Name.StartsWith("."))
+                            if (!tt & !folder.Name.StartsWith(".") &!folder.Name.StartsWith("FinalResult"))
                             GetFoldersAndFiles(currentFolder);
                         }
                         //else
