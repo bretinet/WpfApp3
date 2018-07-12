@@ -100,23 +100,31 @@ namespace WpfApp3
 
                 WriteInformationInLog(writer, path.FullName, "SUCCESS");
 
-                var rootBackup = @"C:\Users\E081138\Documents\TempBackup";
+                var rootBackup = "D:\\NewProbe";// @"C:\Users\E081138\Documents\TempBackup";
+                string currentPath = rootBackup;
                 if (fff.ToList().Count > 1)
                 {
-                    string currentPath = rootBackup;
-                    while (fff.ToList().Count > 1)
+                    
+                    for (var j = 0; j < fff.ToList().Count - 1; j++)
                     {
-                        System.
+                        var ddd = System.IO.Path.Combine(currentPath, fff[j]);
+                        if (!System.IO.Directory.Exists(ddd))
+                        {
+                            var directoryInfo = System.IO.Directory.CreateDirectory(ddd);
+                            currentPath = directoryInfo.FullName;
+                        }
                     }
                 }
                 
                 try
                 {
-                    if (!System.IO.Directory.Exists(rootBackup))
-                    {
-                        System.IO.Directory.CreateDirectory(rootBackup);
-                    }
-                    File.Copy(path.FullName, Path.Combine( rootBackup,  fileName), true);
+                //    if (!System.IO.Directory.Exists(rootBackup))
+                //    {
+                //        System.IO.Directory.CreateDirectory(rootBackup);
+                //    }
+                    var loki = fff[fff.ToList().Count - 1];
+                    var lokiwe = Path.Combine(currentPath, loki);
+                    File.Copy(path.FullName, lokiwe, true);
                 }
                 catch (Exception ex)
                 {
@@ -125,12 +133,53 @@ namespace WpfApp3
                 }
 
 
-
+                path = null;
 
             }
             writer.Flush();
             writer.Close();
             //writer = null;
+
+
+
+            /////
+
+
+            //OriginalFileTextBox.Clear();
+            //ModifiedFileTextBox.Clear();
+
+            foreach (var fileName in SelectedFiles)
+            {
+                var path2 = Path.Combine(rootFolder, fileName);
+                //var fileResult = path2.OpenText().ReadToEndAsync().Result;
+                var yyy = new StreamReader(path2);
+                var fileResult = yyy.ReadToEndAsync().Result;
+                yyy.Close();
+                yyy = null;
+                //file.ContinueWith(task =>
+                //{
+                //    OriginalFileTextBox.Text = file.Result;
+                //}, TaskScheduler.FromCurrentSynchronizationContext());
+
+                //var fileResult = file.Result;
+
+                var finalResult2 = $"<!-- #include file=\"permprefixNew.asp\"-->\n{fileResult}";
+                //fileResult = null;
+                //path2.OpenWrite().Write(Encoding.ASCII.GetBytes(finalResult),0 , Encoding.ASCII.GetBytes(finalResult).Length );
+
+                var ss = new StreamWriter(path2);
+                ss.Write(finalResult2);
+                ss.Flush();
+                ss.Close();
+                ss = null;
+
+            }
+
+
+
+            
+
+           // ModifiedFileTextBox.Text = $"<!-- #include file=\"permprefixNew.asp\"-->\n{fileResult}";
 
         }
 
@@ -144,6 +193,7 @@ namespace WpfApp3
             ss.Append(text);
             ss.Append("  -  ");
             ss.Append(result);
+            ss.Append("  -  ");
             ss.Append("Backup:");
             ss.Append("TRUE");
             ss.Append("  -  ");

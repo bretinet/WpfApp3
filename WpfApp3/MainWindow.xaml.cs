@@ -210,7 +210,7 @@ namespace WpfApp3
                         {
                             var ff = new Regex("(?i:backup)");
                             var tt = ff.Match(folder.Name).Success;
-                            if (!tt)
+                            if (!tt & !folder.Name.StartsWith("."))
                             GetFoldersAndFiles(currentFolder);
                         }
                         //else
@@ -256,13 +256,16 @@ namespace WpfApp3
                 var path = new FileInfo(Path.Combine(SearchFolder, fileName));
 
                 FileTextBox.Clear();
-                Task<string> file = path.OpenText().ReadToEndAsync();
-                file.ContinueWith((s) =>
+                var file = new StreamReader(Path.Combine(SearchFolder, fileName));
+                    
+                 Task<string> file2  = file.ReadToEndAsync();  //path.OpenText().ReadToEndAsync();
+                file2.ContinueWith((s) =>
                 {
-                    FileTextBox.Text = file.Result;
+                    FileTextBox.Text = s.Result;
+                    file.Close();
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-
+                //path = null;
 
 
 
