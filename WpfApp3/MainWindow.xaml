@@ -118,13 +118,11 @@
                         <RowDefinition Height="Auto"></RowDefinition>
                     </Grid.RowDefinitions>
                     <ScrollViewer Grid.Row="0" Name="Probe" >
-                        <TextBox Name="FileTextBox" FontSize="16" HorizontalScrollBarVisibility="Visible"
-                         VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" Background="#FF2E2E2E" Foreground="White"></TextBox>
+                        <TextBox Name="FileTextBox" FontSize="16" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" Background="#FF2E2E2E" Foreground="White" Text="Probe" TextOptions.TextFormattingMode="Display" IsUndoEnabled="False" IsHitTestVisible="False"/>
                     </ScrollViewer>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <Label Content="Match"></Label>
-                        <Label Name="MatchLabel"></Label>
-                    </StackPanel>
+
+                    <Button Grid.Row="1" Name="SaveChangesButton" Content="Save Changes" Click="SaveChangesButton_Click"></Button>
                 </Grid>
 
             </Grid>

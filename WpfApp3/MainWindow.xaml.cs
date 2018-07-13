@@ -473,5 +473,61 @@ namespace WpfApp3
             }
             NewList = !NewList;
         }
+       
+        private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var response = MessageBox.Show("Do you want to save the changes?", "Save Changes", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (response == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    //check the files
+                    //if differents
+                    //Save
+                    string fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
+
+                    var path = new FileInfo(Path.Combine(SearchFolder, fileName));
+
+                    FileTextBox.Clear();
+                    var file = new StreamReader(Path.Combine(SearchFolder, fileName));
+
+                    string originalFile = file.ReadToEndAsync().Result;  //path.OpenText().ReadToEndAsync();
+                                                                         //file2.ContinueWith((s) =>
+                                                                         //{
+                                                                         //    FileTextBox.Text = s.Result;
+                                                                         //    file.Close();
+                                                                         //}, TaskScheduler.FromCurrentSynchronizationContext());
+                    file.Close();
+                    file.Dispose();
+                    
+                    string modifiedFile = FileTextBox.Text;
+
+                    if (originalFile.Equals(modifiedFile))
+                    {
+                        MessageBox.Show("Both files are equal");
+                        return;
+                    }
+
+                    var ss = new StreamWriter(path.FullName);
+                    ss.Write(modifiedFile);
+                    ss.Flush();
+                    ss.Close();
+                    ss.Dispose();
+                    //ss = null;
+                    //var ggghhh = fileName.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
+                    //var tty = ggghhh[ggghhh.Length - 1];
+                    //var finalCopyFilename = Path.Combine(finalResultFolder.FullName, tty);
+                    //System.IO.File.Copy(path2, finalCopyFilename);
+
+                    MessageBox.Show("The file has been modified.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+
+        }
     }
 }

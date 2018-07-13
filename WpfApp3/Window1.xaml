@@ -22,6 +22,8 @@
             <StackPanel Grid.Row="0" Orientation="Horizontal">
                 <Button Name="CheckWebButton" Click="CheckWebButton_Click" Content="Check URLS"></Button>
                 <Button Grid.Row="0" Name="CheckContent" Click="CheckContent_Click" Content="Check Contents"></Button>
+                <Button Grid.Row="0" Name="FilterContent" Click="FilterContent_Click" Content="Filter Contents"></Button>
+                
             </StackPanel>
 
             <ListBox Grid.Row="1" Name="ItemsListBox" SelectionChanged="ItemsListBox_SelectionChanged"></ListBox>
@@ -29,10 +31,26 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Content="Total Files"></Label>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Label Content="Total Files"></Label>
+                    <Label  Name="TotalFilesLabel" Content=""></Label>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Label Content="Procesed Files"></Label>
+                    <Label Name="ProcesedFilesLabel" Content=""></Label>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Label  Content="True Files"></Label>
+                    <Label Name="TrueFilesLabel" Content=""></Label>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                    <Label Content="True Files"></Label>
+                    <Label Name="FalseFilesLabel" Content=""></Label>
+                </StackPanel>
             </Grid>
-
         </Grid>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
         <Grid Grid.Column="2">
