@@ -13,11 +13,13 @@ namespace WpfApp3
 
         public string Result { get; set; }
 
-        public bool Active { get; set; }
+        public bool ActiveLocal { get; set; }
+
+        public bool ActiveRemote { get; set; }
 
         public bool Case { get; set; }
 
-        public bool Negate { get; set; }
+       
 
     }
 }

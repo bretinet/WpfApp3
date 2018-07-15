@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp3"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Background="#FF2E2E2E" Closing="Window_Closing" Activated="Window_Activated">
+        Title="File Analyzer" Height="450" Width="800" Background="#FF2E2E2E" Closing="Window_Closing" Activated="Window_Activated" Loaded="Window_Loaded" WindowState="Maximized">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
@@ -23,7 +23,7 @@
                 <MenuItem Name="ModificationWindowMenuItem" Header="Modification Window" Click="ModificationWindowMenuItem_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="Visualization">
-                <MenuItem Name="FileListMenuItem" Header="File List" IsCheckable="True" IsChecked="True" Checked="MenuItem_OnChecked" Unchecked="FileListMenuItem_OnUnchecked"></MenuItem>
+                <MenuItem Name="FileListMenuItem" Header="File List" IsCheckable="True" IsChecked="True"></MenuItem>
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
@@ -78,36 +78,54 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Name="BtnStart" Content="Get Files" Click="GetFilesButton_Click" HorizontalAlignment="Right" Width="75"/>
-                        <Button Grid.Column="1" Content="Compare for pattens" Click="ComparePatternsButton_Click"></Button>
-                        <Button Grid.Column="2" Name="NewWindowButton" Content="Test URL Pages" Click="NewWindowButton_Click"></Button>
+                        <Button Grid.Column="0" Name="BtnStart" Content="Get Files" Click="GetFilesButton_Click"/>
+                        <Button Grid.Column="1" Content="Compare pattens" Click="ComparePatternsButton_Click"></Button>
+                        <Button Grid.Column="2" Name="NewWindowButton" Content="Test URL Pages" Click="NewWindowButton_Click" Height="20" VerticalAlignment="Top"></Button>
                         <Button Grid.Column="3" Content="Files Creator" Name="FilesCreatorButton" Click="FilesCreatorButton_OnClick"></Button>
-                        <Button Grid.Column="5" Content="Filter" Name="FilterListButton" Click="FilterListButton_Click"></Button>
+                        <Button Grid.Column="4" Content="Filter" Name="FilterListButton" Click="FilterListButton_Click"></Button>
                     </Grid>
                     <Grid Grid.Row="2">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="5*"></RowDefinition>
+                                <RowDefinition Height="5*" MinHeight="50"></RowDefinition>
                                 <RowDefinition Height="5"></RowDefinition>
                                 <RowDefinition Height="*"></RowDefinition>
                             </Grid.RowDefinitions>
-                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="UIElement_OnPreviewMouseWheel">
-                                <ListBox Name="FilesListBox" SelectionChanged="FilesListBox_SelectionChanged" Background="#FF2E2E2E" Foreground="#FFF7F5F5"></ListBox>
-                            </ScrollViewer>
-                            <GridSplitter Grid.Row="1" Height="5" Name="FilesGridSplitter" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="Transparent"></GridSplitter>
+                            <Grid Grid.Row="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox Name="FilesListBox" SelectionChanged="FilesListBox_SelectionChanged" Background="#FF2E2E2E" Foreground="#FFF7F5F5" ScrollViewer.HorizontalScrollBarVisibility="Auto"  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListBox.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Get Files" Click="GetFilesButton_Click"></MenuItem>
+                                                <Separator></Separator>
+                                                <MenuItem Header="Save" Click="SaveFileButton_OnClick"></MenuItem>
+                                                <MenuItem Header="Restore File" Click="RestoreFileButton_OnClick"></MenuItem>
+                                            </ContextMenu>
+                                        </ListBox.ContextMenu>
+                                    </ListBox>
+                                </ScrollViewer>
+                                <Grid Grid.Row="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Foreground="White" FontSize="14">Total files</Label>
+                                        <Label Foreground="White" FontSize="14" FontStyle="Oblique" Name="TotalFilesLabel"></Label>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+
+
+                            <GridSplitter Grid.Row="1" Height="5" Name="FilesGridSplitter" HorizontalAlignment="Stretch" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="DimGray"></GridSplitter>
                             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" >
-                                <ListBox Name="MessageListBox" Background="Transparent"></ListBox>
+                                <TextBox Name="LoadingMessagesTextBox" Background="Transparent" FontSize="14" Foreground="White"></TextBox>
                             </ScrollViewer>
 
                         </Grid>
 
                     </Grid>
-                    <Grid Grid.Row="3">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Foreground="White" FontSize="14">Total files</Label>
-                            <Label Foreground="White" FontSize="14" FontStyle="Oblique" Name="TotalFilesLabel"></Label>
-                        </StackPanel>
-                    </Grid>
+
                 </Grid>
             </Grid>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="DimGray" />
@@ -119,11 +137,24 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer Grid.Row="0" Name="Probe" >
                         <TextBox Name="FileTextBox" FontSize="16" HorizontalScrollBarVisibility="Visible"
-                         VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" Background="#FF2E2E2E" Foreground="White"></TextBox>
+                         VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" Background="#FF2E2E2E" Foreground="White" AcceptsReturn="True" AcceptsTab="True">
+                            <TextBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Cut" Click="CutMenuItem_OnClick"></MenuItem>
+                                    <MenuItem Header="Copy" Click="CopyMenuItem_OnClick"></MenuItem>
+                                    <MenuItem Header="Paste" Click="PasteMenuItem_OnClick"></MenuItem>
+                                    <Separator></Separator>
+                                    <MenuItem Header="Save" Click="SaveFileButton_OnClick"></MenuItem>
+                                    <MenuItem Header="Restore File" Click="RestoreFileButton_OnClick"></MenuItem>
+                                </ContextMenu>
+                            </TextBox.ContextMenu>
+                        </TextBox>
                     </ScrollViewer>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <Label Content="Match"></Label>
-                        <Label Name="MatchLabel"></Label>
+                        <!--<Label Content="Match"></Label>
+                        <Label Name="MatchLabel"></Label>-->
+                        <Button Name="SaveFileButton" Content="Save Content" Click="SaveFileButton_OnClick"></Button>
+                        <Button Name="RestoreFileButton" Content="Restore File" Click="RestoreFileButton_OnClick"></Button>
                     </StackPanel>
                 </Grid>
 

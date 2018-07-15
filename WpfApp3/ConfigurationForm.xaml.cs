@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfApp3.User_Controls;
 
 namespace WpfApp3
 {
@@ -19,7 +20,10 @@ namespace WpfApp3
     /// </summary>
     public partial class ConfigurationForm : Window
     {
-        private ComparePatternsUserControl comparePatternsUserControl;
+        private FilePatternUserControl _filePatternUserControl;
+        private ComparePatternsUserControl _comparePatternsUserControl;
+        private FilterFolderUserControl _filterFolderUserControl;
+        private ModificationOptionsUserControl _modificationOptionsUserControl;
 
         public ConfigurationForm()
         {
@@ -28,23 +32,38 @@ namespace WpfApp3
 
         private void FilePatternButton_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigurationMainFrame.Content = new FilePatternWindow();
-            ContentControl1.Content = new FilePatternUserControl();
+            if (_filePatternUserControl == null)
+            {
+                _filePatternUserControl = new FilePatternUserControl();
+            }
+            ContentControl1.Content = _filePatternUserControl;
         }
 
         private void FolderPatterButton_Click(object sender, RoutedEventArgs e)
         {
-            var sss = new FilePatternWindow();
-            //ConfigurationMainFrame.Content = sss;
+            if (_filterFolderUserControl == null)
+            {
+                _filterFolderUserControl = new FilterFolderUserControl();
+            }
+            ContentControl1.Content = _filterFolderUserControl;
         }
 
         private void ComparePatternButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (comparePatternsUserControl == null)
+            if (_comparePatternsUserControl == null)
             {
-                comparePatternsUserControl = new ComparePatternsUserControl();
+                _comparePatternsUserControl = new ComparePatternsUserControl();
             }
-            ContentControl1.Content = comparePatternsUserControl;
+            ContentControl1.Content = _comparePatternsUserControl;
+        }
+
+        private void ModificationOptionsUserControlButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_modificationOptionsUserControl == null)
+            {
+                _modificationOptionsUserControl = new ModificationOptionsUserControl();
+            }
+            ContentControl1.Content = _modificationOptionsUserControl;
         }
     }
 }

@@ -20,13 +20,24 @@
                 <ColumnDefinition Width="5"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="0" Name="ModificationFilesList" Width="150" SelectionChanged="ModificationFilesList_SelectionChanged"></ListBox>
+            <ListBox Grid.Column="0" Name="ModificationFilesList" MinWidth="150"  SelectionChanged="ModificationFilesList_SelectionChanged"></ListBox>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"  Background="DimGray"></GridSplitter>
             <TextBox Grid.Column="2" Name="OriginalFileTextBox"></TextBox>
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="DimGray"></GridSplitter>
-            <TextBox Grid.Column="4" Name="ModifiedFileTextBox"></TextBox>
+            <TextBox Grid.Column="4" Name="ModifiedFileTextBox" AcceptsTab="True" AcceptsReturn="True">
+                <TextBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Cut" Click="CutMenuItem_OnClick"></MenuItem>
+                        <MenuItem Header="Copy" Click="CopyMenuItem_OnClick"></MenuItem>
+                        <MenuItem Header="Paste" Click="PasteMenuItem_OnClick"></MenuItem>
+                        <Separator></Separator>
+                        <MenuItem Header="Save" Click="SaveFileButton_OnClick"></MenuItem>
+                        <MenuItem Header="Restore File" Click="RestoreFileButton_OnClick"></MenuItem>
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
         </Grid>
         <Button Grid.Row="2" Name="ExecuteButton" Content="Change" Click="ExecuteButton_OnClick"></Button>
-        <Button ></Button>
+        <Button Click="Button_Click" ></Button>
     </Grid>
 </Window>

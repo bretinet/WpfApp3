@@ -3,26 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
-using System.Security.Authentication;
-using System.Security.Permissions;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using WpfApp3.Extensions;
+using WpfApp3.Utilities;
 using Path = System.IO.Path;
 
 namespace WpfApp3
@@ -33,17 +21,22 @@ namespace WpfApp3
     public partial class MainWindow : Window
     {
         private const string DefaultConfigFile = "DefaultConfig.Config";
+        private const string DefaultFolderFile = "DefaultFolder.Config";
+        private const string CompareFilePath = "Compare.bin";
+
         private readonly SynchronizationContext synchronizationContext;
 
         public IEnumerable<string> PatternList { get; set; }
         private SourceCodeFile sourceCodeFile;
 
+        public int ItemsCounter { get; set; }
+        public bool IncludeSubFolders { get; set; } = true;
+        private readonly List<string> fileNameList = new List<string>();
+
         public MainWindow()
         {
             InitializeComponent();
-            //Probe..Initialize(this);
 
-            //Probe.CanContentScroll = false;
             synchronizationContext = SynchronizationContext.Current;
 
             SearchFolder = String.Empty;
@@ -77,15 +70,19 @@ namespace WpfApp3
 
         private void GetFilesButton_Click(object sender, RoutedEventArgs e)
         {
-            Configuration.Instance.FileConfiguration = new FilePatternConfiguration
-            {
-                DefaultFolder = RootFolderTextBox.Text,
-                DefaultFilterPattern = FilterPatternTextBox.Text,
-                DefaultUrl = UrlBaseAddressTextBox.Text,
-                IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
-            };
+            //Configuration.Instance.FileConfiguration = new FilePatternConfiguration
+            //{
+            //    RootFolder = RootFolderTextBox.Text,
+            //    FilterPattern = FilterPatternTextBox.Text,
+            //    UrlBaseAddresst = UrlBaseAddressTextBox.Text,
+            //    IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
+            //};
+
+            UpdateFileConfiguration();
 
             fileNameList.Clear();
+            LoadingMessagesTextBox.Clear();
+
             ItemsCounter = default(int);
 
             IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? true;
@@ -106,8 +103,7 @@ namespace WpfApp3
             Configuration.Instance.SelectedFiles = fileNameList;
         }
 
-        public int ItemsCounter { get; set; }
-        public bool IncludeSubFolders { get; set; } = true;
+
 
         private IEnumerable<string> GetFilters()
         {
@@ -127,14 +123,12 @@ namespace WpfApp3
             return patterns;
         }
 
-        private readonly List<string> fileNameList = new List<string>();
+      
         public void GetFoldersAndFiles(string directory)
         {
             var currentDirectory = Path.Combine(SearchFolder, directory);
             var directoryInfo = new DirectoryInfo(currentDirectory);
 
-            //var pattern = string.IsNullOrEmpty(PatternTextBox.Text) ? "*" : PatternTextBox.Text;
-            //var files = directoryInfo.GetFiles(pattern, searchOption: SearchOption.TopDirectoryOnly);
 
             var filesInFolder = new List<string>();
 
@@ -142,12 +136,13 @@ namespace WpfApp3
             {
                 try
                 {
-                    var folderInformation = new FolderInformation();
+                    //var folderInformation = new FolderInformation();
                     //var ttt = folderInformation.IsFolderAccessible(currentDirectory, FileSystemRights.Traverse);
                     //var exist = System.IO.Directory.Exists(currentDirectory);
-                    var fffilter = new Regex("^"+ filterPattern +"$");
+                    var fffilter = new Regex("^" + filterPattern + "$");
 
                     var files = directoryInfo.GetFiles("*", SearchOption.TopDirectoryOnly).Where(x => fffilter.Match(x.Name).Success);
+
                     foreach (var fileInfo in files)
                     {
                         if (!string.IsNullOrEmpty(fileInfo.Name))
@@ -208,10 +203,25 @@ namespace WpfApp3
                         var fff = new FolderInformation();
                         //if (fff.IsFolderAccessible(currentFolder, FileSystemRights.Read))
                         {
-                            var ff = new Regex("(?i:backup)");
-                            var tt = ff.Match(folder.Name).Success;
-                            if (!tt & !folder.Name.StartsWith(".") &!folder.Name.StartsWith("FinalResult"))
-                            GetFoldersAndFiles(currentFolder);
+                            ////var ff = new Regex("(?i:backup)");
+                            ////var tt = ff.Match(folder.Name).Success;
+                            ////if (!tt & !folder.Name.StartsWith(".") & !folder.Name.StartsWith("FinalResult"))
+                            if (IsFolderElegible(folder.Name))
+                            {
+                                 GetFoldersAndFiles(currentFolder);
+                            }
+                            else
+                            {
+                                var vvv = $"Folder {Path.Combine(directory, folder.Name)} not loaded because of the folder filter pattern restrictions\n";
+                                synchronizationContext.Post(new SendOrPostCallback(o =>
+                                {
+                                    //TotalFilesLabel.Content = (int)o;
+                                    LoadingMessagesTextBox.Text += o.ToString();
+                                }), vvv);
+                                
+                                    
+                            }
+                               
                         }
                         //else
                         //{
@@ -234,91 +244,83 @@ namespace WpfApp3
 
         }
 
+        private bool IsFolderElegible(string folderName)
+        {
+            FolderLoadingOptions folderOption = Configuration.Instance.FolderLoadingConfiguration.FolderLoadingOptions;
+
+            if (folderOption == FolderLoadingOptions.AllFolders)
+            {
+                return true;
+            }
+
+            if (folderOption == FolderLoadingOptions.OnlySelectedFolders)
+            {
+                //var result = false;
+                var list = Configuration.Instance.FolderLoadingConfiguration.FolderList;
+                foreach (var item in list)
+                {
+                    var regex = new Regex(item);
+                    if (regex.Match(folderName).Success)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (folderOption == FolderLoadingOptions.AllFolderExcept)
+            {
+                //var result = false;
+                var list = Configuration.Instance.FolderLoadingConfiguration.FolderList;
+                foreach (var item in list)
+                {
+                    var regex = new Regex(item);
+                    if (regex.Match(folderName).Success)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         private void FilesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (FilesListBox?.SelectedItem == null)
             {
                 return;
             }
-            string fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
-            //MessageBox.Show(FilesListBox.SelectedItem.ToString());
-            try
+
+            var fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
+            var path = new FileInfo(Path.Combine(SearchFolder, fileName));
+
+            var result = IoUtilities.ReadStringFromFile(path.FullName);
+
+            if (result != null)
             {
-                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (False)"))
-                //{
-                //    ff = ff.Replace(" (False)", "");
-                //}
-                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (True)"))
-                //{
-                //    ff = ff.Replace(" (True)", "");
-                //}
-
-                var path = new FileInfo(Path.Combine(SearchFolder, fileName));
-
-                FileTextBox.Clear();
-                var file = new StreamReader(Path.Combine(SearchFolder, fileName));
-                    
-                 Task<string> file2  = file.ReadToEndAsync();  //path.OpenText().ReadToEndAsync();
-                file2.ContinueWith((s) =>
-                {
-                    FileTextBox.Text = s.Result;
-                    file.Close();
-                }, TaskScheduler.FromCurrentSynchronizationContext());
-
-                //path = null;
-
-
-
+                FileTextBox.Text = result;
             }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
-            }
-
         }
 
         private void NewWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            Window1 window1 = new Window1();
-            //window1.Probe = fileNameList;
-            window1.Show();
-
-
-
-        }
-
-        private void UIElement_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var scv = (ScrollViewer)sender;
-            scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
-            e.Handled = true;
+            UpdateFileConfiguration();
+            var serverFilesCheckWindow = new ServerFilesCheckWindow {Owner = this};
+            serverFilesCheckWindow.Show();
         }
 
         private void ComparePatternsButton_Click(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show(FilesListBox.SelectedItem.ToString());
-
-            //var ss = Regex.Match(FileTextBox.Text, "html");
-
-            //MatchLabel.Content = ss.Success.ToString();
-            //MessageBox.Show(ss.Success.ToString());
-
-            //if (ss.Success)
-            //{
-            //    var fff= FilesListBox.Items.CurrentItem as ListBoxItem;
-            //    var fff2 = FilesListBox.Items.CurrentItem as string;
-            //    var ggg = FilesListBox.ItemContainerStyle; 
-            //    ;
-
-            //}
             var CompareFilePath = "Compare.bin";
 
 
             try
             {
 
-                var persistence = new Persistence<List<ComparePatterns>>();
-                var comparerPatterns = persistence.GetConfigurationValues(CompareFilePath);
+                //var persistence = new Persistence<List<ComparePatterns>>();
+                //persistence.GetConfigurationValues(CompareFilePath);
+                var comparerPatterns = Configuration.Instance.ComparePatterns;
 
                 if (comparerPatterns == null || !comparerPatterns.Any())
                 {
@@ -338,24 +340,24 @@ namespace WpfApp3
                     var validation = new PatternValidation();
                     foreach (var pattern in comparerPatterns)
                     {
-                        if (!pattern.Active) continue;
+                        if (!pattern.ActiveLocal) continue;
 
                         string patternValue;
-                        if (pattern.Negate)
-                        {
-                            patternValue = $"^({pattern.Pattern})";
-                        }
-                        else
-                        {
-                            patternValue = pattern.Pattern;
-                        }
+                        //if (pattern.ActiveRemote)
+                        //{
+                        //    patternValue = $"{pattern.Pattern}";
+                        //}
+                        //else
+                        //{
+                        //    patternValue = pattern.Pattern;
+                        //}
                         RegexOptions options = pattern.Case ? RegexOptions.IgnoreCase : RegexOptions.None;
 
 
-                        var isMatching = validation.IsMatchingPattern(patternValue, text, options);
+                        var isMatching = validation.IsMatchingPattern(pattern.Pattern, text, options);
 
-                        fileNameList[i] = $"{fileNameList[i]} ({isMatching})";
-                    } 
+                        fileNameList[i] = isMatching? $"{fileNameList[i]} ({pattern.Result})": $"{fileNameList[i]} (False)";
+                    }
                 }
 
                 FilesListBox.ItemsSource = null;
@@ -365,32 +367,13 @@ namespace WpfApp3
             {
                 MessageBox.Show(exception.Message);
             }
-
-   
-
-
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var window = new ConfigurationForm();
+            UpdateFileConfiguration();
+            var window = new ConfigurationForm {Owner = this};
             window.Show();
-        }
-
-        private void MenuItem_OnChecked(object sender, RoutedEventArgs e)
-        {
-            //if (FilesListBox != null)
-            //{
-            //    FilesListBox.Visibility = Visibility.Visible;
-            //    FilesGridSplitter.Visibility = Visibility.Visible;
-            //}
-        }
-
-        private void FileListMenuItem_OnUnchecked(object sender, RoutedEventArgs e)
-        {
-            //((FilesListBox.Parent as ScrollViewer).Parent as DataGridRow).Visibility = Visibility.Collapsed;
-            //(FilesGridSplitter.Parent as DataGridRow).Visibility = Visibility.Collapsed;
-            ////(MessageListBox.Parent as Grid).
         }
 
         private void ExitMenuItem_OnClick(object sender, RoutedEventArgs e)
@@ -420,27 +403,16 @@ namespace WpfApp3
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            var persistence = new Persistence<FilePatternConfiguration>();
 
-            var configuration = persistence.GetConfigurationValues(DefaultConfigFile);
-            if (configuration != null)
-            {
-                SearchFolder = configuration.DefaultFolder;
-                RootFolderTextBox.Text = SearchFolder;
-                FilterPatternTextBox.Text = configuration.DefaultFilterPattern;
-                UrlBaseAddressTextBox.Text = configuration.DefaultUrl;
-                IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
-
-            }
         }
 
         private void ModificationWindowMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             var fileConfiguration = new FilePatternConfiguration
             {
-                DefaultFolder = RootFolderTextBox.Text,
-                DefaultFilterPattern = FilterPatternTextBox.Text,
-                DefaultUrl = UrlBaseAddressTextBox.Text,
+                RootFolder = RootFolderTextBox.Text,
+                FilterPattern = FilterPatternTextBox.Text,
+                UrlBaseAddresst = UrlBaseAddressTextBox.Text,
                 IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
             };
 
@@ -457,7 +429,7 @@ namespace WpfApp3
             {
                 foreach (var item in fileNameList)
                 {
-                    if (item.Contains (" (True)"))
+                    if (item.Contains(" (True)"))
                     {
                         tt.Add(item);
                     }
@@ -472,6 +444,151 @@ namespace WpfApp3
                 FilesListBox.ItemsSource = fileNameList;
             }
             NewList = !NewList;
+        }
+
+        private void SaveFileButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (FilesListBox.SelectedItems.Count != 1)
+            {
+                return;
+            }
+
+            var fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
+            var response = MessageBox.Show($"Do you want to modify the file {fileName}?", "Modify file", MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (response != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var path = new FileInfo(Path.Combine(SearchFolder, fileName));
+            var currentText = FileTextBox.Text;
+
+
+            var originalText = IoUtilities.ReadStringFromFile(path.FullName);
+            if (originalText.Equals(currentText))
+            {
+                MessageBox.Show("Both files are identical", "Modify file", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            IoUtilities.WriteStringToFile(path.FullName, currentText);
+            MessageBox.Show($"The content of the file {fileName} has been changed.", "Modify file", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void RestoreFileButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var file = GetListBoxSelectedFile();
+
+            if (file == null)
+            {
+                return;
+            }
+
+            var originalText = IoUtilities.ReadStringFromFile(file.FullName);
+
+            if (originalText.Equals(FileTextBox.Text))
+            {
+                MessageBox.Show("Both files are identical", "Restore files", MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+            else
+            {
+                var response  = MessageBox.Show("Do you want to restore the original file?", "Restore files", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (response == MessageBoxResult.Yes)
+                {
+                    FileTextBox.Text = originalText;
+                }
+            }
+
+
+
+        }
+
+
+        private FileInfo GetListBoxSelectedFile()
+        {
+            if (FilesListBox.SelectedItem == null)
+            {
+                return null;
+            }
+
+            var fileName = FilesListBox.SelectedItem.ToString().CleanFileName();
+            return  new FileInfo(Path.Combine(SearchFolder, fileName));
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var persistence = new Persistence<FilePatternConfiguration>();
+
+            var configuration = persistence.GetConfigurationValues(DefaultConfigFile);
+
+            if (configuration != null)
+            {
+                Configuration.Instance.DefaultFileConfiguration = configuration;
+                Configuration.Instance.FileConfiguration = Configuration.Instance.DefaultFileConfiguration;
+                SearchFolder = Configuration.Instance.FileConfiguration.RootFolder;
+
+            }
+
+            //if (configuration != null)
+            //{
+            //    SearchFolder = configuration.RootFolder;
+            //    RootFolderTextBox.Text = SearchFolder;
+            //    FilterPatternTextBox.Text = configuration.FilterPattern;
+            //    UrlBaseAddressTextBox.Text = configuration.UrlBaseAddresst;
+            //    IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
+            //    Configuration.Instance.FileConfiguration.RootFolder = configuration.RootFolder;
+            //    configuration.
+            //}
+
+            RootFolderTextBox.Text = Configuration.Instance.FileConfiguration.RootFolder;
+            FilterPatternTextBox.Text = Configuration.Instance.FileConfiguration.FilterPattern;
+            UrlBaseAddressTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddresst;
+            IncludeSubFoldersCheckBox.IsChecked = Configuration.Instance.FileConfiguration.IncludeSubFolders;
+
+            var persistence2 = new Persistence<FolderLoadingConfiguration>();
+
+            var configuration2 = persistence2.GetConfigurationValues(DefaultFolderFile);
+            if (configuration != null)
+            {
+                Configuration.Instance.FolderLoadingConfiguration = configuration2;
+
+            }
+
+
+            var comparenPatterns = new Persistence<List<ComparePatterns>>();
+
+           Configuration.Instance.ComparePatterns = comparenPatterns.GetConfigurationValues(CompareFilePath);
+ 
+        }
+
+        private void CopyMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+           Clipboard.SetText(FileTextBox.SelectedText);
+        }
+
+        private void CutMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(FileTextBox.SelectedText);
+            FileTextBox.SelectedText = string.Empty;
+        }
+
+        private void PasteMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+
+            FileTextBox.Paste();
+        }
+
+        private void UpdateFileConfiguration()
+        {
+            Configuration.Instance.FileConfiguration.RootFolder = RootFolderTextBox.Text;
+            Configuration.Instance.FileConfiguration.FilterPattern = FilterPatternTextBox.Text;
+            Configuration.Instance.FileConfiguration.UrlBaseAddresst = UrlBaseAddressTextBox.Text;
+            Configuration.Instance.FileConfiguration.IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false;
         }
     }
 }

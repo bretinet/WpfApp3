@@ -30,5 +30,9 @@ namespace WpfApp3
 
         public FilePatternConfiguration DefaultFileConfiguration { get; set; }
 
+        public FolderLoadingConfiguration FolderLoadingConfiguration { get; set; }
+
+        public List<ComparePatterns> ComparePatterns { get; set; }
+
     }
 }

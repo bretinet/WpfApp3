@@ -34,8 +34,8 @@
                 <ComboBoxItem Content="Error"></ComboBoxItem>
             </ComboBox>
 
-            <CheckBox Grid.Row="2" Grid.Column="1" Name="ActiveCheckBox" Foreground="White" FontSize="14" Content="Active" Margin="0 5"></CheckBox>
-            <CheckBox Grid.Row="3" Grid.Column="1" Name="NegateCheckBox" Foreground="White" FontSize="14" Content="Negate" Margin="0 5"></CheckBox>
+            <CheckBox Grid.Row="2" Grid.Column="1" Name="ActiveLocalCheckBox" Foreground="White" FontSize="14" Content="Active Local" Margin="0 5"></CheckBox>
+            <CheckBox Grid.Row="3" Grid.Column="1" Name="ActiveRemoteCheckBox" Foreground="White" FontSize="14" Content="Actrive Remote" Margin="0 5"></CheckBox>
             <CheckBox Grid.Row="4" Grid.Column="1" Name="CaseCheckBox" Foreground="White" FontSize="14" Content="Ignore Case" Margin="0 5 0 10"></CheckBox>
             <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Name="DeleteButton" Content="Delete Pattern" Margin="0 5 20 10" Click="DeleteButton_Click" ></Button>
@@ -49,7 +49,14 @@
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <DataGrid Grid.Row="0" Name="ComparePatternsDataGrid" AllowDrop="False" CanUserAddRows="False" CanUserReorderColumns="False" MinHeight="120" MouseDoubleClick="ComparePatternsDataGrid_MouseDoubleClick">
+            <DataGrid Grid.Row="0" Name="ComparePatternsDataGrid" AllowDrop="False" CanUserAddRows="False" CanUserReorderColumns="False" MinHeight="120" MouseDoubleClick="ComparePatternsDataGrid_MouseDoubleClick" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Path=Pattern}" Header="Pattern" Width="*"></DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path=Result}" Header="Result" Width="100"></DataGridTextColumn>
+                    <DataGridCheckBoxColumn Binding="{Binding Path=ActiveLocal}" Header="Active Local" Width="60"></DataGridCheckBoxColumn>
+                    <DataGridCheckBoxColumn Binding="{Binding Path=ActiveRemote}" Header="Active Remote" Width="60"></DataGridCheckBoxColumn>
+                    <DataGridCheckBoxColumn Binding="{Binding Path=Case}" Header="No Case" Width="60"></DataGridCheckBoxColumn>
+                </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" Name="SaveButton" Content="Save" Click="SaveButton_OnClick" HorizontalAlignment="Right" Width="75" Margin="0 10 0 10"></Button>
         </Grid>

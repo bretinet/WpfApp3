@@ -61,6 +61,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ComparePatterns.cs" />
+    <Compile Include="FolderLoadingConfiguration.cs" />
     <Compile Include="ModifyFilesWindow.xaml.cs">
       <DependentUpon>ModifyFilesWindow.xaml</DependentUpon>
     </Compile>
@@ -92,8 +93,12 @@
     <Compile Include="User Controls\FilterFolderUserControl.xaml.cs">
       <DependentUpon>FilterFolderUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Window1.xaml.cs">
-      <DependentUpon>Window1.xaml</DependentUpon>
+    <Compile Include="User Controls\ModificationOptionsUserControl.xaml.cs">
+      <DependentUpon>ModificationOptionsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\IoUtilities.cs" />
+    <Compile Include="ServerFilesCheckWindow.xaml.cs">
+      <DependentUpon>ServerFilesCheckWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Window2.xaml.cs">
       <DependentUpon>Window2.xaml</DependentUpon>
@@ -142,7 +147,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Window1.xaml">
+    <Page Include="ServerFilesCheckWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="User Controls\ModificationOptionsUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

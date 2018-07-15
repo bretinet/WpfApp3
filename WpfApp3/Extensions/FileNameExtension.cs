@@ -12,14 +12,14 @@ namespace WpfApp3.Extensions
         {
             const string False = " (False)";
             const string True = " (True)";
-            const string Warning = " (Warning)";
-            const string Error = " (Error)";
+            const string warning = " (Warning)";
+            const string error = " (Error)";
 
             return filename
                 .Replace(False, string.Empty)
                 .Replace(True, string.Empty)
-                .Replace(Warning, string.Empty)
-                .Replace(Error, string.Empty);
+                .Replace(warning, string.Empty)
+                .Replace(error, string.Empty);
         }
     }
 }

@@ -5,7 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp3"
         mc:Ignorable="d"
-        Title="ConfigurationForm" Height="450" Width="800" Background="#FF2E2E2E">
+        Title="ConfigurationForm" Height="450" Width="800" Background="#FF2E2E2E" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
@@ -29,6 +37,7 @@
                 <Button Height="40" Name="FilePatternButton" Content="ContentControl" Click="FilePatternButton_Click" Background="Transparent" Foreground="White" FontSize="14"></Button>
                 <Button Height="40" Name="FolderPatterButton" Content="Folder Pattern" Click="FolderPatterButton_Click"></Button>
                 <Button Height="40" Name="ComparePatternButton" Content="Compare Patterns" Click="ComparePatternButton_OnClick" Background="Transparent" FontSize="14" Foreground="White"></Button>
+                <Button Height="40" Name="ModificationOptionsButton" Content="Modification Options" Click="ModificationOptionsUserControlButton_OnClick"  Background="Transparent" FontSize="14" Foreground="White"></Button>
             </StackPanel>
            
             <ContentControl Grid.Column="1" Name="ContentControl1" Background="Black">

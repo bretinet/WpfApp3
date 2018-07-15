@@ -31,16 +31,20 @@
                 <TextBox Grid.Row="0" Grid.Column="0" Name="DefaultFolderTextBox"></TextBox>
                 <Button Grid.Row="0" Grid.Column="1" Name="DefaultFolderButton" Content="..." Margin="10 0 0 0" Click="DefaultFolderButton_Click"></Button>
             </Grid>
-            
+
             <Label Grid.Row="1" Grid.Column="0" Content="Defaul Filter Pattern" FontSize="14" Foreground="White" Margin="0 0 10 0"></Label>
             <TextBox Grid.Row="1" Grid.Column="1" Name="DefaulFilterTextBox" Margin="0 5"></TextBox>
-            
+
             <Label Grid.Row="2" Grid.Column="0" Content="Defaul URL" FontSize="14" Foreground="White"></Label>
             <TextBox Grid.Row="2" Grid.Column="1" Name="DefaultUrlTextBox" Margin="0 5"></TextBox>
-            
+
             <CheckBox Grid.Row="3" Grid.Column="1" Name="IncludeSubFoldersCheckBox" Content="Include subdirectories" FontSize="14" Foreground="White" Margin="0 5"></CheckBox>
         </Grid>
-        <Button Grid.Row="1" Name="SaveFilePatternButton" Content="Save" Click="SaveFilePatternButton_Click" HorizontalAlignment="Right" Width="75" Margin="0 10"></Button>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="GetConfigurationButton" Content="Get Configuration" Click="GetConfigurationButton_OnClick" Margin="0 10 20 10"/>
+            <Button Name="SaveFilePatternButton" Content="Save" Click="SaveFilePatternButton_Click" HorizontalAlignment="Right" Width="75" Margin="0 10"></Button>
+        </StackPanel>
+
     </Grid>
 </UserControl>
 
