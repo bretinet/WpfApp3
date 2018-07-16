@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:WpfApp3"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="FontSize" Value="14"></Setter>
+        </Style>
+
     </Application.Resources>
 </Application>

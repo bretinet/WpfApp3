@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WpfApp3.Extensions;
+using WpfApp3.Utilities;
 
 namespace WpfApp3
 {
@@ -21,6 +22,7 @@ namespace WpfApp3
     /// </summary>
     public partial class ModifyFilesWindow : Window
     {
+        string injectedCode = "<!--#include file=\"permprefixNew.asp\"-->";
         private readonly List<string> SelectedFiles;
         public ModifyFilesWindow()
         {
@@ -39,48 +41,57 @@ namespace WpfApp3
 
         private void ModificationFilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
+
             if (ModificationFilesList?.SelectedItem == null)
             {
                 return;
             }
 
             var fileName = ModificationFilesList.SelectedItem.ToString().CleanFileName();
-            //MessageBox.Show(FilesListBox.SelectedItem.ToString());
-            try
-            {
-                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (False)"))
-                //{
-                //    ff = ff.Replace(" (False)", "");
-                //}
-                //if (FilesListBox.SelectedItem.ToString().EndsWith(" (True)"))
-                //{
-                //    ff = ff.Replace(" (True)", "");
-                //}
-                var rootFolder = Configuration.Instance.FileConfiguration.DefaultFolder;
 
-                var path = new FileInfo(Path.Combine(rootFolder, fileName));
+            var originalText = IoUtilities.ReadStringFromFile(fileName);
+            OriginalFileTextBox.Text = originalText;
 
-                OriginalFileTextBox.Clear();
-                ModifiedFileTextBox.Clear();
+            var modifiedText = GetModifiedFile(originalText, injectedCode);
+            ModifiedFileTextBox.Text = modifiedText;
 
-                var file = path.OpenText().ReadToEndAsync();
-                file.ContinueWith(task =>
-                {
-                    OriginalFileTextBox.Text = file.Result;
-                }, TaskScheduler.FromCurrentSynchronizationContext());
+            //////MessageBox.Show(FilesListBox.SelectedItem.ToString());
+            ////try
+            ////{
+            ////    //if (FilesListBox.SelectedItem.ToString().EndsWith(" (False)"))
+            ////    //{
+            ////    //    ff = ff.Replace(" (False)", "");
+            ////    //}
+            ////    //if (FilesListBox.SelectedItem.ToString().EndsWith(" (True)"))
+            ////    //{
+            ////    //    ff = ff.Replace(" (True)", "");
+            ////    //}
+            ////    var rootFolder = Configuration.Instance.FileConfiguration.RootFolder;
 
-                var fileResult = file.Result;
+            ////    var path = new FileInfo(Path.Combine(rootFolder, fileName));
 
-                ModifiedFileTextBox.Text = $"<!-- #include file=\"permprefixNew.asp\"-->\n{fileResult}";
+            ////    OriginalFileTextBox.Clear();
+            ////    ModifiedFileTextBox.Clear();
+
+            ////    var file = path.OpenText().ReadToEndAsync();
+            ////    file.ContinueWith(task =>
+            ////    {
+            ////        OriginalFileTextBox.Text = file.Result;
+            ////    }, TaskScheduler.FromCurrentSynchronizationContext());
+
+            ////    var fileResult = file.Result;
+
+            ////    ModifiedFileTextBox.Text = $"<!-- #include file=\"permprefixNew.asp\"-->\n{fileResult}";
 
 
 
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
+            ////}
+            ////catch (Exception exception)
+            ////{
+            ////    MessageBox.Show(exception.Message);
 
-            }
+            ////}
         }
 
         private void ExecuteButton_OnClick(object sender, RoutedEventArgs e)
@@ -90,7 +101,7 @@ namespace WpfApp3
             var injectedCode = "<!--#include file=\"permprefixNew.asp\"-->";
 
 
-            var rootFolder = Configuration.Instance.FileConfiguration.DefaultFolder;
+            var rootFolder = Configuration.Instance.FileConfiguration.RootFolder;
 
             var writer = new StreamWriter("log.txt");
             FileInfo path;
@@ -98,7 +109,7 @@ namespace WpfApp3
             {
                 var fileName = SelectedFiles[i];
 
-                var pahtWithoutRoot = fileName.Replace(Configuration.Instance.FileConfiguration.DefaultFolder, "");
+                var pahtWithoutRoot = fileName.Replace(Configuration.Instance.FileConfiguration.RootFolder, "");
 
                 var fff = pahtWithoutRoot.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -150,7 +161,7 @@ namespace WpfApp3
 
             /////
 
-            var ggg = Configuration.Instance.FileConfiguration.DefaultFolder;
+            var ggg = Configuration.Instance.FileConfiguration.RootFolder;
             var finalResultFolder = Directory.CreateDirectory(Path.Combine(ggg, "FinalResult"));
 
             //OriginalFileTextBox.Clear();
@@ -160,10 +171,10 @@ namespace WpfApp3
             {
                 var path2 = Path.Combine(rootFolder, fileName);
                 //var fileResult = path2.OpenText().ReadToEndAsync().Result;
-                var yyy = new StreamReader(path2);
-                var fileResult = yyy.ReadToEndAsync().Result;
-                yyy.Close();
-                yyy = null;
+                ////var yyy = new StreamReader(path2);
+                ////var fileResult = yyy.ReadToEndAsync().Result;
+                ////yyy.Close();
+                //yyy = null;
                 //file.ContinueWith(task =>
                 //{
                 //    OriginalFileTextBox.Text = file.Result;
@@ -171,64 +182,70 @@ namespace WpfApp3
 
                 //var fileResult = file.Result;
 
-                string finalResult2 = string.Empty;
 
-                var ttt = Regex.Match(fileResult, @"(?i:(<%@\s*Language=VBScript\s*%>))");
+                //////////////////////////////////////////////////
+                ////string finalResult2 = string.Empty;
 
-                var ttt2 = Regex.Match(fileResult, "((<%)[^<%]*(Option.Explicit)[^(%>)]*(%>))", RegexOptions.Multiline| RegexOptions.IgnoreCase); //"<%.*\r.*Option\sExplicit.*%>"
+                ////var ttt = Regex.Match(fileResult, @"(?i:(<%@\s*Language=VBScript\s*%>))");
 
-
-                if (ttt.Success || ttt2.Success)
-                {
-                    //MessageBox.Show("Found at position: " + ttt.Index + "Finish at position:" + ttt.Index + ttt.Length);
+                ////var ttt2 = Regex.Match(fileResult, "((<%)[^<%]*(Option.Explicit)[^(%>)]*(%>))", RegexOptions.Multiline| RegexOptions.IgnoreCase); //"<%.*\r.*Option\sExplicit.*%>"
 
 
-                    string part1, part2;
-                    if (ttt2.Success)
-                    {
-                        //MessageBox.Show("Found at position: " + ttt2.Index + "Finish at position:" + ttt2.Index + ttt2.Length);
-
-                        part1 = fileResult.Substring(0, ttt2.Index + ttt2.Length);
-
-                        part2 = fileResult.Substring(ttt2.Index + ttt2.Length, fileResult.Length - (ttt2.Index + ttt2.Length));
+                ////if (ttt.Success || ttt2.Success)
+                ////{
+                ////    //MessageBox.Show("Found at position: " + ttt.Index + "Finish at position:" + ttt.Index + ttt.Length);
 
 
-                        //finalResult2 =  $"<!--#include file=\"permprefixNew.asp\"-->\n{fileResult}";
+                ////    string part1, part2;
+                ////    if (ttt2.Success)
+                ////    {
+                ////        //MessageBox.Show("Found at position: " + ttt2.Index + "Finish at position:" + ttt2.Index + ttt2.Length);
 
-                        //finalResult2 = $"{part1}{injectedCode}{part2}";
+                ////        part1 = fileResult.Substring(0, ttt2.Index + ttt2.Length);
 
-                       // ModifiedFileTextBox.Text = finalResult2;
-                    }
-                    else
-                    {
-                        part1 = fileResult.Substring(0, ttt.Index + ttt.Length);
-                        part2 = fileResult.Substring(ttt.Index + ttt.Length, fileResult.Length - (ttt.Index + ttt.Length));
-                        //finalResult2 = $"{part1}{injectedCode}{part2}";
-
-                        //ModifiedFileTextBox.Text = finalResult2;
-                    }
-                    finalResult2 = $"{part1}\n{injectedCode}{part2}";
+                ////        part2 = fileResult.Substring(ttt2.Index + ttt2.Length, fileResult.Length - (ttt2.Index + ttt2.Length));
 
 
-                }
-                else
-                {
-                    finalResult2 = $"{injectedCode}\n{fileResult}";
-                }
-                ModifiedFileTextBox.Text = finalResult2;
+                ////        //finalResult2 =  $"<!--#include file=\"permprefixNew.asp\"-->\n{fileResult}";
+
+                ////        //finalResult2 = $"{part1}{injectedCode}{part2}";
+
+                ////       // ModifiedFileTextBox.Text = finalResult2;
+                ////    }
+                ////    else
+                ////    {
+                ////        part1 = fileResult.Substring(0, ttt.Index + ttt.Length);
+                ////        part2 = fileResult.Substring(ttt.Index + ttt.Length, fileResult.Length - (ttt.Index + ttt.Length));
+                ////        //finalResult2 = $"{part1}{injectedCode}{part2}";
+
+                ////        //ModifiedFileTextBox.Text = finalResult2;
+                ////    }
+                ////    finalResult2 = $"{part1}\n{injectedCode}{part2}";
+
+
+                ////}
+                ////else
+                ////{
+                ////    finalResult2 = $"{injectedCode}\n{fileResult}";
+                ////}
+                ////ModifiedFileTextBox.Text = finalResult2;
+
+
+                ///////////////////////////////////////////////////////////////
 
                 //fileResult = null;
                 //path2.OpenWrite().Write(Encoding.ASCII.GetBytes(finalResult),0 , Encoding.ASCII.GetBytes(finalResult).Length );
+                var originalText = IoUtilities.ReadStringFromFile(path2);
 
+                var modifiedText = GetModifiedFile(originalText, injectedCode);
 
-
-
+                IoUtilities.WriteStringToFile(path2,modifiedText);
                 
-                var ss = new StreamWriter(path2);
-                ss.Write(finalResult2);
-                ss.Flush();
-                ss.Close();
-                ss = null;
+                ////var ss = new StreamWriter(path2);
+                ////ss.Write(finalResult2);
+                ////ss.Flush();
+                ////ss.Close();
+                ////ss = null;
                 var ggghhh = fileName.Split(new string [] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
                 var tty = ggghhh[ggghhh.Length - 1];
                 var finalCopyFilename = Path.Combine(finalResultFolder.FullName,tty );
@@ -264,6 +281,111 @@ namespace WpfApp3
 
             streamWriter.WriteLine(ss.ToString());
 
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+
+
+        internal string GetModifiedFile(string originalText, string injectedCode)
+        {
+            string modifiedText;
+
+            var regexValidation1 = Regex.Match(originalText, @"(?i:(<%\s*\bLanguage\b\s*=\s*\bVBScript\b\s*%>))"); //  @"(?i:(<%@\s*Language=VBScript\s*%>))");
+
+            var temp = originalText.Replace("\r\n", "");
+            var regexValidation2 = Regex.Match(originalText, @"(?i:(<%[^<]*\bOption\b\s+\bExplicit\b[^>]*%>))");//                      @":(<%(?!\s+<%).*\bOption\b\s+\bExplicit\b.*(?<!%>.*)%>))"); //    "((<%)[^<%]*(Option.Explicit)[^(%>)]*(%>))", RegexOptions.Singleline | RegexOptions.IgnoreCase); //"<%.*\r.*Option\sExplicit.*%>"
+
+
+            if (regexValidation1.Success || regexValidation2.Success)
+            {
+                string part1, part2;
+                if (regexValidation2.Success)
+                {
+                    part1 = originalText.Substring(0, regexValidation2.Index + regexValidation2.Length);
+                    part2 = originalText.Substring(regexValidation2.Index + regexValidation2.Length, originalText.Length - (regexValidation2.Index + regexValidation2.Length));
+                }
+                else
+                {
+                    part1 = originalText.Substring(0, regexValidation1.Index + regexValidation1.Length);
+                    part2 = originalText.Substring(regexValidation1.Index + regexValidation1.Length, originalText.Length - (regexValidation1.Index + regexValidation1.Length));
+                }
+                modifiedText = $"{part1}\n{injectedCode}{part2}";
+            }
+            else
+            {
+                modifiedText = $"{injectedCode}\n{originalText}";
+            }
+            return modifiedText;
+        }
+
+        private void CutMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(ModifiedFileTextBox.SelectedText);
+            ModifiedFileTextBox.SelectedText = string.Empty;
+        }
+
+        private void CopyMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(ModifiedFileTextBox.SelectedText);
+        }
+
+        private void PasteMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            ModifiedFileTextBox.Paste();
+        }
+
+        private void SaveFileButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (ModificationFilesList.SelectedItems.Count != 1)
+            {
+                return;
+            }
+
+            var fileName = ModificationFilesList.SelectedItem.ToString().CleanFileName();
+            var response = MessageBox.Show($"Do you want to modify the file {fileName}?", "Modify file", MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (response != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+           // var path = new FileInfo(Path.Combine(SearchFolder, fileName));
+            var currentText = ModifiedFileTextBox.Text;
+
+
+            var originalText = IoUtilities.ReadStringFromFile(fileName);
+            if (originalText.Equals(currentText))
+            {
+                MessageBox.Show("Both files are identical", "Modify file", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            IoUtilities.WriteStringToFile(fileName, currentText);
+            MessageBox.Show($"The content of the file {fileName} has been changed.", "Modify file", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void RestoreFileButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var response = MessageBox.Show("Do you want to restore this file?", "Restore File", MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (response != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var fileName = ModificationFilesList.SelectedItem.ToString().CleanFileName();
+
+            var originalText = IoUtilities.ReadStringFromFile(fileName);
+
+            var modifiedText = GetModifiedFile(originalText, injectedCode);
+
+            ModifiedFileTextBox.Text = modifiedText;
         }
     }
 }

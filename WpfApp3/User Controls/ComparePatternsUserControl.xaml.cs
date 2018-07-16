@@ -38,9 +38,9 @@ namespace WpfApp3
             {
                 Pattern = PatternTextBox.Text,
                 Result = ResultComboBox.SelectionBoxItem.ToString(),
-                Active = ActiveCheckBox?.IsChecked ?? false,
+                ActiveLocal = ActiveLocalCheckBox?.IsChecked ?? false,
                 Case = CaseCheckBox?.IsChecked ?? false,
-                Negate = NegateCheckBox?.IsChecked ?? false
+                ActiveRemote = ActiveRemoteCheckBox?.IsChecked ?? false
             });
 
             ComparePatternsDataGrid.ItemsSource = null;
@@ -49,9 +49,18 @@ namespace WpfApp3
 
         private void UserControl_Initialized(object sender, EventArgs e)
         {
-            var sss = new Persistence<List<ComparePatterns>>();
+            if (Configuration.Instance.ComparePatterns == null)
+            {
+                var persistence = new Persistence<List<ComparePatterns>>();
 
-            comparePatterns = sss.GetConfigurationValues(CompareFilePath);
+                comparePatterns = persistence.GetConfigurationValues(CompareFilePath);
+                Configuration.Instance.ComparePatterns = comparePatterns;
+            }
+            else
+            {
+                comparePatterns = Configuration.Instance.ComparePatterns;
+            }
+
 
             ComparePatternsDataGrid.ItemsSource = comparePatterns;
         }
@@ -61,6 +70,8 @@ namespace WpfApp3
             var sss = new Persistence<List<ComparePatterns>>();
 
             sss.SetConfigurationValues(CompareFilePath, comparePatterns);
+
+            Configuration.Instance.ComparePatterns = comparePatterns;
         }
 
         private void ModifyButton_Click(object sender, RoutedEventArgs e)
@@ -71,8 +82,8 @@ namespace WpfApp3
 
                 comparePatterns[index].Pattern = PatternTextBox.Text;
                 comparePatterns[index].Result = ResultComboBox.SelectionBoxItem.ToString();
-                comparePatterns[index].Active = ActiveCheckBox?.IsChecked ?? false;
-                comparePatterns[index].Negate = NegateCheckBox?.IsChecked ?? false;
+                comparePatterns[index].ActiveLocal = ActiveLocalCheckBox?.IsChecked ?? false;
+                comparePatterns[index].ActiveRemote = ActiveRemoteCheckBox?.IsChecked ?? false;
                 comparePatterns[index].Case = CaseCheckBox?.IsChecked ?? false;
 
                 ComparePatternsDataGrid.ItemsSource = null;
@@ -92,9 +103,9 @@ namespace WpfApp3
                 if (result == "True") ResultComboBox.SelectedIndex = 1;
                 if (result == "Warning") ResultComboBox.SelectedIndex = 2;
                 if (result == "Error") ResultComboBox.SelectedIndex = 3;
-                ActiveCheckBox.IsChecked =  comparePatterns[index].Active;
-                NegateCheckBox.IsChecked =  comparePatterns[index].Negate;
-                CaseCheckBox.IsChecked =  comparePatterns[index].Case;           
+                ActiveLocalCheckBox.IsChecked = comparePatterns[index].ActiveLocal;
+                ActiveRemoteCheckBox.IsChecked = comparePatterns[index].ActiveRemote;
+                CaseCheckBox.IsChecked = comparePatterns[index].Case;
             }
         }
 
@@ -103,12 +114,6 @@ namespace WpfApp3
             if (ComparePatternsDataGrid.SelectedIndex > -1 && ComparePatternsDataGrid.SelectedItems.Count == 1)
             {
                 var index = ComparePatternsDataGrid.SelectedIndex;
-
-                //comparePatterns[index].Pattern = PatternTextBox.Text;
-                //comparePatterns[index].Result = ResultComboBox.SelectionBoxItem.ToString();
-                //comparePatterns[index].Active = ActiveCheckBox?.IsChecked ?? false;
-                //comparePatterns[index].Negate = NegateCheckBox?.IsChecked ?? false;
-                //comparePatterns[index].Case = CaseCheckBox?.IsChecked ?? false;
 
                 comparePatterns.RemoveAt(index);
 

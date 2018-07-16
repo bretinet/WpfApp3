@@ -25,6 +25,18 @@ namespace WpfApp3
         public FilePatternUserControl()
         {
             InitializeComponent();
+
+            var persistence = new Persistence<FilePatternConfiguration>();
+
+            var configuration = persistence.GetConfigurationValues(DefaultConfigFile);
+            if (configuration != null)
+            {
+                DefaultFolderTextBox.Text = configuration.RootFolder;
+                DefaulFilterTextBox.Text = configuration.FilterPattern;
+                DefaultUrlTextBox.Text = configuration.UrlBaseAddresst;
+                IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
+
+            }
         }
 
         private void SaveFilePatternButton_Click(object sender, RoutedEventArgs e)
@@ -36,9 +48,9 @@ namespace WpfApp3
                 var filePatternConfiguration = new FilePatternConfiguration
                 {
 
-                    DefaultFolder = DefaultFolderTextBox.Text,
-                    DefaultFilterPattern = DefaulFilterTextBox.Text,
-                    DefaultUrl = DefaultUrlTextBox.Text,
+                    RootFolder = DefaultFolderTextBox.Text,
+                    FilterPattern = DefaulFilterTextBox.Text,
+                    UrlBaseAddresst = DefaultUrlTextBox.Text,
                     IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
                 };
 
@@ -54,17 +66,7 @@ namespace WpfApp3
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var persistence = new Persistence<FilePatternConfiguration>();
 
-            var configuration = persistence.GetConfigurationValues(DefaultConfigFile);
-            if (configuration != null)
-            {
-                DefaultFolderTextBox.Text = configuration.DefaultFolder;
-                DefaulFilterTextBox.Text = configuration.DefaultFilterPattern;
-                DefaultUrlTextBox.Text = configuration.DefaultUrl;
-                IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
-
-            }
 
         }
 
@@ -76,6 +78,14 @@ namespace WpfApp3
             {
                 DefaultFolderTextBox.Text = folderDialog.FileName;
             }
+        }
+
+        private void GetConfigurationButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            DefaultFolderTextBox.Text = Configuration.Instance.FileConfiguration.RootFolder;
+            DefaulFilterTextBox.Text = Configuration.Instance.FileConfiguration.FilterPattern;
+            DefaultUrlTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddresst;
+            IncludeSubFoldersCheckBox.IsChecked = Configuration.Instance.FileConfiguration.IncludeSubFolders;
         }
     }
 }
