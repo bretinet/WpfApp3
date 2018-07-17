@@ -47,6 +47,7 @@ namespace WpfApp3
             ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
 
             synchronizationContext = SynchronizationContext.Current;
+            TotalFilesLabel.Content = Configuration.Instance.UrlFiles.Count.ToString();
         }
 
         private void CheckWebButton_Click(object sender, RoutedEventArgs e)
@@ -56,8 +57,9 @@ namespace WpfApp3
             GetWebPages();
 
         }
-       
-        readonly ConcurrentDictionary<string, Container> _dictionary = new ConcurrentDictionary<string, Container>();
+        private object dictionaryLock = new object();
+        readonly Dictionary<string, Container> _dictionary = new Dictionary<string, Container>();
+        //readonly ConcurrentDictionary<string, Container> _dictionary = new ConcurrentDictionary<string, Container>();
         private void GetWebPages()
         {
             _dictionary.Clear();
@@ -67,57 +69,58 @@ namespace WpfApp3
             var regex = new System.Text.RegularExpressions.Regex("id=\"frmLogon\"");
             var items = Configuration.Instance.UrlFiles;
 
-            Func<string, Container, Container> f1;
-            f1 = (s, container) => new Container()
+            //Func<string, Container, Container> f1;
+            //f1 = (s, container) => new Container()
+            //{
+            //    result = false,
+            //    message = container.message
+
+            //};
+            //SemaphoreSlim maxThread = new SemaphoreSlim(2);
+
+            ////for (int i = 0; i < items.Count; i++) //
+            ////{
+
+            ////    var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+
+            ////    var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            ////    var httpClient = new HttpClient { Timeout = new TimeSpan(0, 0, 0, 20) };
+            ////    maxThread.Wait();
+            ////    Task.Factory.StartNew(() =>
+            ////    {
+
+
+            ////        var response = httpClient.GetAsync(url).Result;
+            ////        //var returnedValue = response.Content.ReadAsStringAsync().Result;
+
+
+            ////        _dictionary.AddOrUpdate(selectedItem, new Container()
+            ////        {
+            ////            message = response,
+            ////            //result = regex.Match(returnedValue).Success
+            ////        }, f1);
+
+
+            ////        synchronizationContext.Post(new SendOrPostCallback(o =>
+            ////        {
+            ////            CheckWebButton.Content = o.ToString();
+            ////        }), _dictionary.Count);
+
+            ////        //    CheckWebButton.Content = o.ToString();
+            ////        //}), dictionary.Count.ToString());
+
+            ////    })
+
+            ////    .ContinueWith((task) => maxThread.Release());
+
+
+            ////}
+
+
+
+            for (int i = 0; i < items.Count; i++)
             {
-                result = false,
-                message = container.message
 
-            };
-            SemaphoreSlim maxThread = new SemaphoreSlim(2);
-
-            for (int i = 0; i < items.Count; i++) //
-            {
-
-                var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
-
-                var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
- var httpClient = new HttpClient { Timeout = new TimeSpan(0, 0, 0, 20) };
-                maxThread.Wait();
-                Task.Factory.StartNew(() =>
-                {
-                   
-
-                    var response = httpClient.GetAsync(url).Result;
-                    //var returnedValue = response.Content.ReadAsStringAsync().Result;
-
-
-                    _dictionary.AddOrUpdate(selectedItem, new Container()
-                    {
-                        message = response,
-                        //result = regex.Match(returnedValue).Success
-                    }, f1);
-
-
-                    synchronizationContext.Post(new SendOrPostCallback(o =>
-                    {
-                        CheckWebButton.Content = o.ToString();
-                    }), _dictionary.Count);
-
-                    //    CheckWebButton.Content = o.ToString();
-                    //}), dictionary.Count.ToString());
-
-                })
-
-                .ContinueWith((task) => maxThread.Release())
-
-
-
-
-                ;
-
-
-                /*
                 try
                 {
 
@@ -131,16 +134,22 @@ namespace WpfApp3
 
                         var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
 
-                        dictionary.Add(selectedItem, new Container()
+                        lock (dictionaryLock)
                         {
-                            message = response.Result,
-                            result = ssss.Match(returnedValue).Success
-                        });
-                            
-
-                        CheckWebButton.Content = dictionary.Count.ToString();
 
                         
+                            _dictionary.Add(selectedItem, new Container()
+                            {
+                                message = response.Result,
+                                result = regex.Match(returnedValue).Success
+                            });
+                        }
+
+
+
+                        //CheckWebButton.Content = _dictionary.Count.ToString();
+                        ProcesedFilesLabel.Content = _dictionary.Count.ToString();
+
                         //if (ssss.Match(returnedValue).Success)
                         //{
                         //    items[i] = items[i] + " (True)";
@@ -182,7 +191,7 @@ namespace WpfApp3
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                }*/
+                }
             }
         }
 
@@ -225,7 +234,7 @@ namespace WpfApp3
         private void CheckContent_Click(object sender, RoutedEventArgs e)
         {
 
-            var patterns = Configuration.Instance.ComparePatterns.Where(x=>x.ActiveRemote);
+            var patterns = Configuration.Instance.ComparePatterns.Where(x => x.ActiveRemote);
 
             //Configuration.Instance.UrlFiles = items;
             //ItemsListBox.ItemsSource = null;
@@ -236,26 +245,30 @@ namespace WpfApp3
             {
                 var item = tempList[i];
 
-                foreach (var pattern  in patterns)
+                foreach (var pattern in patterns)
                 {
                     var xxx = new Regex(pattern.Pattern);
                     if (_dictionary.ContainsKey(item))
                     {
                         var g = _dictionary[item];
 
-                        var ttt = ((Container) g).message.Content.ReadAsStringAsync().Result;
+                        var ttt = ((Container)g).message.Content.ReadAsStringAsync().Result;
 
                         if (xxx.Match(ttt).Success)
                         {
-                            tempList[i] = tempList[i] +  $" ({pattern.Result})";
+                            tempList[i] = tempList[i] + $" ({pattern.Result})";
+                            _dictionary[item].result = true;
                         }
                         else
                         {
                             tempList[i] = tempList[i] + " (False)";
+                            _dictionary[item].result = true;
                         }
                     }
                 }
 
+                TrueFilesLabel.Content = Configuration.Instance.UrlFiles.Where(x => x.Contains(" (True)")).ToList().Count.ToString();
+                FalseFilesLabel.Content = Configuration.Instance.UrlFiles.Where(x => x.Contains(" (False)")).ToList().Count.ToString();
                 //if (_dictionary.ContainsKey(item))
                 //{
                 //    var v = _dictionary[item].result;
@@ -288,9 +301,25 @@ namespace WpfApp3
             ItemsListBox.ItemsSource = null;
             ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
         }
-
+        int mode = 0;
         private void FilterContent_Click(object sender, RoutedEventArgs e)
         {
+            mode++;
+            ItemsListBox.ItemsSource = null;
+            mode = mode % 3;
+            if (mode == 1)
+            {
+                ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles.Where(x => x.Contains(" (True)"));
+            }
+            else if (mode == 2)
+            {
+                ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles.Where(x => x.Contains(" (False)")); ;
+            }
+            else
+            {
+                ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
+            }
+
 
         }
     }

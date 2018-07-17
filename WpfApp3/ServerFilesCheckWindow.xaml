@@ -20,7 +20,7 @@
                 <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal">
-                <Button Name="CheckWebButton" Click="CheckWebButton_Click" Content="Check URLS"></Button>
+                <Button Name="CheckWebButton" Click="CheckWebButton_Click" Content="Check URLS" Height="20" VerticalAlignment="Top"></Button>
                 <Button Grid.Row="0" Name="CheckContent" Click="CheckContent_Click" Content="Check Contents"></Button>
                 <Button Grid.Row="0" Name="FilterContentTextBox" Click="FilterContent_Click" Content="FilterContentTextBox_Click"></Button>
                 
@@ -47,7 +47,7 @@
                     <Label Name="TrueFilesLabel" Content=""></Label>
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
-                    <Label Content="True Files"></Label>
+                    <Label Content="False Files"></Label>
                     <Label Name="FalseFilesLabel" Content=""></Label>
                 </StackPanel>
             </Grid>

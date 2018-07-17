@@ -238,7 +238,10 @@ namespace WpfApp3
                 var originalText = IoUtilities.ReadStringFromFile(path2);
 
                 var modifiedText = GetModifiedFile(originalText, injectedCode);
-
+                if (originalText.Equals(modifiedText))
+                {
+                    continue;
+                }
                 IoUtilities.WriteStringToFile(path2,modifiedText);
                 
                 ////var ss = new StreamWriter(path2);
@@ -249,6 +252,10 @@ namespace WpfApp3
                 var ggghhh = fileName.Split(new string [] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
                 var tty = ggghhh[ggghhh.Length - 1];
                 var finalCopyFilename = Path.Combine(finalResultFolder.FullName,tty );
+                if (File.Exists(finalCopyFilename))
+                {
+                    finalCopyFilename = finalCopyFilename + DateTime.Now.Ticks.ToString();
+                }
                 System.IO.File.Copy(path2, finalCopyFilename);
             }
 
@@ -294,6 +301,11 @@ namespace WpfApp3
         internal string GetModifiedFile(string originalText, string injectedCode)
         {
             string modifiedText;
+
+            if (Regex.Match(originalText, injectedCode).Success)
+            {
+                return originalText;
+            }
 
             var regexValidation1 = Regex.Match(originalText, @"(?i:(<%\s*\bLanguage\b\s*=\s*\bVBScript\b\s*%>))"); //  @"(?i:(<%@\s*Language=VBScript\s*%>))");
 
