@@ -6,6 +6,17 @@
         xmlns:local="clr-namespace:WpfApp3"
         mc:Ignorable="d"
         Title="File Analyzer" Height="450" Width="800" Background="#FF2E2E2E" Closing="Window_Closing" Activated="Window_Activated" Loaded="Window_Loaded" WindowState="Maximized">
+    <Window.Resources>
+        <Style  TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="CaretBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="White"></SolidColorBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
@@ -58,15 +69,15 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                                 <ColumnDefinition Width="35"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Name="RootFolderTextBox" Background="Transparent" Foreground="White" FontSize="14" Margin="0 5 5 5"></TextBox>
+                            <TextBox Grid.Column="0" Name="RootFolderTextBox" Foreground="White" FontSize="14" Margin="0 5 5 5"></TextBox>
                             <Button Grid.Column="1"  Name="BtnSelectFolder" Content="..." Width="35" Click="BtnSelectFolder_Click" Margin="0 5 0 5"></Button>
                         </Grid>
 
                         <Label Grid.Row="1" Grid.Column="0" FontSize="14" Foreground="White">Filter Pattern</Label>
-                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="FilterPatternTextBox" Background="Transparent" Foreground="White" FontSize="14" Margin="0 5 0 5"></TextBox>
+                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="FilterPatternTextBox" Foreground="White" FontSize="14" Margin="0 5 0 5"/>
 
                         <Label Grid.Row="2" Grid.Column="0" FontSize="14" Foreground="White" Margin="0 0 10 0">URL Base Address</Label>
-                        <TextBox Grid.Row="2" Grid.Column="1" Name="UrlBaseAddressTextBox" Background="Transparent" Foreground="White" FontSize="14" Margin="0 5 0 5"></TextBox>
+                        <TextBox Grid.Row="2" Grid.Column="1" Name="UrlBaseAddressTextBox" Foreground="White" FontSize="14" Margin="0 5 0 5"></TextBox>
                         <CheckBox Grid.Row="3" Grid.Column="1" Name="IncludeSubFoldersCheckBox" FontSize="14" Foreground="White" IsChecked="True" Margin="0 8 0 0">Include subdirectories</CheckBox>
                     </Grid>
 

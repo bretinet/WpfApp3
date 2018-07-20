@@ -120,115 +120,164 @@ namespace WpfApp3
 
             for (int i = 0; i < items.Count; i++)
             {
+                var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+                var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
 
-                try
-                {
+                GetUrlResponse(url);
+                //try
+                //{
 
-                    var httpClient = new HttpClient();
-                    //var selectedItem = ItemsListBox.SelectedItem.ToString().Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
-                    var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+                //    var httpClient = new HttpClient();
+                //    //var selectedItem = ItemsListBox.SelectedItem.ToString().Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+                //    var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
 
-                    var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
-                    var httpClientResponse = httpClient.GetAsync(url).ContinueWith((response) =>
-                    {
+                //    var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+                //    var httpClientResponse = httpClient.GetAsync(url).ContinueWith((response) =>
+                //    {
 
-                        var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
+                //        var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
 
-                        lock (dictionaryLock)
-                        {
+                //        lock (dictionaryLock)
+                //        {
 
                         
-                            _dictionary.Add(selectedItem, new Container()
-                            {
-                                message = response.Result,
-                                result = regex.Match(returnedValue).Success
-                            });
-                        }
+                //            _dictionary.Add(selectedItem, new Container()
+                //            {
+                //                message = response.Result,
+                //                result = regex.Match(returnedValue).Success
+                //            });
+                //        }
 
 
 
-                        //CheckWebButton.Content = _dictionary.Count.ToString();
-                        ProcesedFilesLabel.Content = _dictionary.Count.ToString();
+                //        //CheckWebButton.Content = _dictionary.Count.ToString();
+                //        ProcesedFilesLabel.Content = _dictionary.Count.ToString();
 
-                        //if (ssss.Match(returnedValue).Success)
-                        //{
-                        //    items[i] = items[i] + " (True)";
-                        //}
-                        //else
-                        //{
-                        //    items[i] = items[i] + " (False)";
-                        //}
-
-
-                    }, TaskScheduler.FromCurrentSynchronizationContext());
-
-                    System.Threading.Tasks.Task.Delay(200);
-                    // .ContinueWith(re =>
-                    //{
-                    //    dictionary.Add(selectedItem, re.);
+                //        //if (ssss.Match(returnedValue).Success)
+                //        //{
+                //        //    items[i] = items[i] + " (True)";
+                //        //}
+                //        //else
+                //        //{
+                //        //    items[i] = items[i] + " (False)";
+                //        //}
 
 
+                //    }, TaskScheduler.FromCurrentSynchronizationContext());
+
+                //    System.Threading.Tasks.Task.Delay(200);
+                //    // .ContinueWith(re =>
+                //    //{
+                //    //    dictionary.Add(selectedItem, re.);
 
 
-                    //    System.Threading.Tasks.Task.Delay(100);
-                    //});
-                    //dictionary.Add(selectedItem, httpClientResponse);
-                    // var header = httpClientResponse.Headers.ToString();
-                    //var returnedValue = httpClientResponse.Content.ReadAsStringAsync().Result;
-                    //var contentHeader = httpClientResponse.Content.Headers.ToString();
 
-                    //HeaderTextBox.Text = header;
-                    //HeaderTextBox.Text += contentHeader;
-                    //return await;
-                    //HtmlTextBox.Text = returnedValue;
-                    //var temp 
 
-                    //if (!string.IsNullOrWhiteSpace(returnedValue))
-                    //{
-                    //    WebBrowserHTML.NavigateToString(returnedValue);
-                    //}
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                //    //    System.Threading.Tasks.Task.Delay(100);
+                //    //});
+                //    //dictionary.Add(selectedItem, httpClientResponse);
+                //    // var header = httpClientResponse.Headers.ToString();
+                //    //var returnedValue = httpClientResponse.Content.ReadAsStringAsync().Result;
+                //    //var contentHeader = httpClientResponse.Content.Headers.ToString();
+
+                //    //HeaderTextBox.Text = header;
+                //    //HeaderTextBox.Text += contentHeader;
+                //    //return await;
+                //    //HtmlTextBox.Text = returnedValue;
+                //    //var temp 
+
+                //    //if (!string.IsNullOrWhiteSpace(returnedValue))
+                //    //{
+                //    //    WebBrowserHTML.NavigateToString(returnedValue);
+                //    //}
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show(ex.Message);
+                //}
             }
         }
 
+
+        private void GetUrlResponse (string Url)
+        {
+            try
+            {
+                var httpClient = new HttpClient();
+                ////var selectedItem = ItemsListBox.SelectedItem.ToString().Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+                //var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+
+                //var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+                var httpClientResponse = httpClient.GetAsync(Url).ContinueWith((response) =>
+                {
+                    //var regex = new System.Text.RegularExpressions.Regex("id=\"frmLogon\"");
+                    var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
+
+                    lock (dictionaryLock)
+                    {
+
+
+                        _dictionary.Add(Url, new Container()
+                        {
+                            message = response.Result,
+                            //result = regex.Match(returnedValue).Success
+                        });
+                    }
+
+
+
+                    //CheckWebButton.Content = _dictionary.Count.ToString();
+                    ProcesedFilesLabel.Content = _dictionary.Count.ToString();
+
+
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+
+                //System.Threading.Tasks.Task.Delay(200);
+
+            }
+                catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+
         private void ItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
-            var selectedItem2 = ItemsListBox.SelectedItem;
-            if (selectedItem2 == null) return;
+            
+            //var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            //var selectedItem2 = ItemsListBox.SelectedItem;
+            //if (selectedItem2 == null) return;
 
-            var selectedItem = selectedItem2.ToString().CleanFileName().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "");
-            if (_dictionary.ContainsKey(selectedItem))
-            {
-                Container container;
-                var isHttpMessage = _dictionary.TryGetValue(selectedItem, out container);
-                if (isHttpMessage)
-                {
-                    var header = container.message.Headers.ToString();
-                    var returnedValue = container.message.Content.ReadAsStringAsync().Result;
-                    var contentHeader = container.message.Content.Headers.ToString();
+            //var selectedItem = selectedItem2.ToString().CleanFileName().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "");
+            //if (_dictionary.ContainsKey(selectedItem))
+            //{
+            //    Container container;
+            //    var isHttpMessage = _dictionary.TryGetValue(selectedItem, out container);
+            //    if (isHttpMessage)
+            //    {
+            //        var header = container.message.Headers.ToString();
+            //        var returnedValue = container.message.Content.ReadAsStringAsync().Result;
+            //        var contentHeader = container.message.Content.Headers.ToString();
 
-                    HeaderTextBox.Text = header;
-                    HeaderTextBox.Text += contentHeader;
-                    //return await;
-                    HtmlTextBox.Text = returnedValue;
+            //        HeaderTextBox.Text = header;
+            //        HeaderTextBox.Text += contentHeader;
+            //        //return await;
+            //        HtmlTextBox.Text = returnedValue;
 
-                    if (!string.IsNullOrWhiteSpace(returnedValue))
-                    {
-                        WebBrowserHTML.NavigateToString(returnedValue);
-                    }
-                }
+            //        if (!string.IsNullOrWhiteSpace(returnedValue))
+            //        {
+            //            WebBrowserHTML.NavigateToString(returnedValue);
+            //        }
+            //    }
 
 
-            }
-            else
-            {
-                MessageBox.Show("Item not loaded yet!");
-            }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Item not loaded yet!");
+            //}
         }
 
         private void CheckContent_Click(object sender, RoutedEventArgs e)
@@ -321,6 +370,54 @@ namespace WpfApp3
             }
 
 
+        }
+
+        private void CheckUrlMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+            var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            GetUrlResponse(url);
+        }
+
+        private void ItemsListBox_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (ItemsListBox.SelectedItem == null) return;
+
+            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
+            var selectedItem2 = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            //var selectedItem2 = ItemsListBox.SelectedItem;
+            if (selectedItem2 == null) return;
+
+            //var selectedItem = selectedItem2.ToString().CleanFileName().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "");
+            if (_dictionary.ContainsKey(selectedItem2))
+            {
+                Container container;
+                var isHttpMessage = _dictionary.TryGetValue(selectedItem2, out container);
+                if (isHttpMessage)
+                {
+                    var header = container.message.Headers.ToString();
+                    var returnedValue = container.message.Content.ReadAsStringAsync().Result;
+                    var contentHeader = container.message.Content.Headers.ToString();
+
+                    HeaderTextBox.Text = header;
+                    HeaderTextBox.Text += contentHeader;
+                    //return await;
+                    HtmlTextBox.Text = returnedValue;
+
+                    if (!string.IsNullOrWhiteSpace(returnedValue))
+                    {
+                        WebBrowserHTML.NavigateToString(returnedValue);
+                    }
+                }
+
+
+            }
+            else
+            {
+                MessageBox.Show("Item not loaded yet!");
+            }
         }
     }
 

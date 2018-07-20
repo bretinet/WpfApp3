@@ -26,7 +26,14 @@
                 
             </StackPanel>
 
-            <ListBox Grid.Row="1" Name="ItemsListBox" SelectionChanged="ItemsListBox_SelectionChanged"></ListBox>
+            <ListBox Grid.Row="1" Name="ItemsListBox" SelectionChanged="ItemsListBox_SelectionChanged" MouseLeftButtonUp="ItemsListBox_MouseLeftButtonUp">
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Name="CheckUrlMenuItem" Header="Check URL" Click="CheckUrlMenuItem_Click" ></MenuItem>
+                        <MenuItem Header="Delete Last Result"></MenuItem>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
