@@ -21,6 +21,7 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal">
                 <Button Name="CheckWebButton" Click="CheckWebButton_Click" Content="Check URLS" Height="20" VerticalAlignment="Top"></Button>
+                <Button Name="CheckUrlReturnedMenuItem" Content="Check URL Againg" Click="CheckUrlReturnedMenuItem_Click" ></Button>
                 <Button Grid.Row="0" Name="CheckContent" Click="CheckContent_Click" Content="Check Contents"></Button>
                 <Button Grid.Row="0" Name="FilterContentTextBox" Click="FilterContent_Click" Content="FilterContentTextBox_Click"></Button>
                 
@@ -30,7 +31,10 @@
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Name="CheckUrlMenuItem" Header="Check URL" Click="CheckUrlMenuItem_Click" ></MenuItem>
+                        <MenuItem Name="CheckContentMenuItem" Header="Update Validation" Click="CheckContentMenuItem_Click"></MenuItem>
+                        <MenuItem Name="CheckUrlContentMenuItem" Header="Check URL &amp; Update" Click="CheckUrlContentMenuItem_Click"></MenuItem>
                         <MenuItem Header="Delete Last Result"></MenuItem>
+                        <MenuItem Name="CopyListInClipboard" Header="Copy list in clipboard" Click="CopyListInClipboard_Click"></MenuItem>
                     </ContextMenu>
                 </ListBox.ContextMenu>
             </ListBox>

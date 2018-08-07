@@ -307,7 +307,7 @@ namespace WpfApp3
                 return originalText;
             }
 
-            var regexValidation1 = Regex.Match(originalText, @"(?i:(<%@\s*[Ll]anguage\s*=\s*VBScript\s*%>))"); //  @"(?i:(<%@\s*Language=VBScript\s*%>))");
+            var regexValidation1 = Regex.Match(originalText, @"(?i:(<%@\s*[Ll]anguage\s*=\s*[""]?VBScript[""]?\s*%>))"); //  @"(?i:(<%@\s*Language=VBScript\s*%>))");
 
             var temp = originalText.Replace("\r\n", "");
             var regexValidation2 = Regex.Match(originalText, @"(?i:(<%[^<]*\bOption\b\s+\bExplicit\b[^>]*%>))");//                      @":(<%(?!\s+<%).*\bOption\b\s+\bExplicit\b.*(?<!%>.*)%>))"); //    "((<%)[^<%]*(Option.Explicit)[^(%>)]*(%>))", RegexOptions.Singleline | RegexOptions.IgnoreCase); //"<%.*\r.*Option\sExplicit.*%>"

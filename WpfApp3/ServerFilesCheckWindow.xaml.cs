@@ -117,11 +117,12 @@ namespace WpfApp3
             ////}
 
 
+            var httpClient = new HttpClient();
 
             for (int i = 0; i < items.Count; i++)
             {
                 var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
-                var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+                var url = Configuration.Instance.FileConfiguration.UrlBaseAddress + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
 
                 GetUrlResponse(url);
                 //try
@@ -140,7 +141,7 @@ namespace WpfApp3
                 //        lock (dictionaryLock)
                 //        {
 
-                        
+
                 //            _dictionary.Add(selectedItem, new Container()
                 //            {
                 //                message = response.Result,
@@ -199,11 +200,14 @@ namespace WpfApp3
         }
 
 
-        private void GetUrlResponse (string Url)
+        private void GetUrlResponse(string Url, HttpClient httpClient = null)
         {
             try
             {
-                var httpClient = new HttpClient();
+                if (httpClient == null)
+                {
+                    httpClient = new HttpClient();
+                }
                 ////var selectedItem = ItemsListBox.SelectedItem.ToString().Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
                 //var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
 
@@ -211,7 +215,7 @@ namespace WpfApp3
                 var httpClientResponse = httpClient.GetAsync(Url).ContinueWith((response) =>
                 {
                     //var regex = new System.Text.RegularExpressions.Regex("id=\"frmLogon\"");
-                    var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
+                    //var returnedValue = response.Result.Content.ReadAsStringAsync().Result;
 
                     lock (dictionaryLock)
                     {
@@ -235,7 +239,7 @@ namespace WpfApp3
                 //System.Threading.Tasks.Task.Delay(200);
 
             }
-                catch (Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -245,7 +249,7 @@ namespace WpfApp3
 
         private void ItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+
             //var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
             //var selectedItem2 = ItemsListBox.SelectedItem;
             //if (selectedItem2 == null) return;
@@ -296,22 +300,23 @@ namespace WpfApp3
 
                 foreach (var pattern in patterns)
                 {
-                    var xxx = new Regex(pattern.Pattern);
-                    if (_dictionary.ContainsKey(item))
+                    var url = Configuration.Instance.FileConfiguration.UrlBaseAddress + item;
+                    var regex = new Regex(pattern.Pattern);
+                    if (_dictionary.ContainsKey(url))
                     {
-                        var g = _dictionary[item];
+                        var g = _dictionary[url];
 
-                        var ttt = ((Container)g).message.Content.ReadAsStringAsync().Result;
+                        var contentResult = ((Container)g).message.Content.ReadAsStringAsync().Result;
 
-                        if (xxx.Match(ttt).Success)
+                        if (regex.Match(contentResult).Success)
                         {
-                            tempList[i] = tempList[i] + $" ({pattern.Result})";
-                            _dictionary[item].result = true;
+                            tempList[i] = tempList[i] + $" ({((Container)g).message.StatusCode}) ({pattern.Result})";
+                            _dictionary[url].result = true;
                         }
                         else
                         {
-                            tempList[i] = tempList[i] + " (False)";
-                            _dictionary[item].result = true;
+                            tempList[i] = tempList[i] + $" ({((Container)g).message.StatusCode}) (False)";
+                            _dictionary[url].result = true;
                         }
                     }
                 }
@@ -372,52 +377,169 @@ namespace WpfApp3
 
         }
 
+        private void CheckStatus(string url)
+        {
+            //var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            //var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "").Replace(" (OK)", "").Replace(" (InternalServerError)", "").Replace(" (NotFound)", "");
+            //var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            //GetUrlResponse(url);
+
+            var tempList = Configuration.Instance.UrlFiles;
+            var currentItem = ItemsListBox.SelectedItem.ToString();
+            //Replace(" (True)", "").Replace(" (False)", "").Replace(" (OK)", "").Replace(" (InternalServerError)", "").Replace(" (NotFound)", "");
+
+            var index = tempList.IndexOf(currentItem);
+
+            if (index < 0) return;
+
+            var patterns = Configuration.Instance.ComparePatterns.Where(x => x.ActiveRemote);
+
+            //var temporalValue = tempList[index].CleanFileName();
+            tempList[index] = tempList[index].CleanFileName();
+
+            if (!_dictionary.ContainsKey(url)) return;
+
+            var responseMessage = _dictionary[url];
+
+            var AddStatusResult = true;
+            if (AddStatusResult)
+            {
+                tempList[index] =  $"{tempList[index]} ({((Container)responseMessage).message.StatusCode})";
+            }
+
+
+
+            foreach (var pattern in patterns)
+            {
+                var regex = new Regex(pattern.Pattern);
+                if (_dictionary.ContainsKey(url))
+                {
+                   
+                    var contentResult = ((Container)responseMessage).message.Content.ReadAsStringAsync().Result;
+
+                    if (regex.Match(contentResult).Success)
+                    {
+
+                        tempList[index] = $"{tempList[index]} ({pattern.Result})";
+                        _dictionary[url].result = true;
+                    }
+                    else
+                    {
+                        tempList[index] = $"{tempList[index]} (False)";
+                        _dictionary[url].result = true;
+                    }
+                }
+            }
+        }
+
+
         private void CheckUrlMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
-            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
-            var url = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "").Replace(" (OK)", "").Replace(" (InternalServerError)", "").Replace(" (NotFound)", "");
+            var url = Configuration.Instance.FileConfiguration.UrlBaseAddress + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
             GetUrlResponse(url);
         }
 
         private void ItemsListBox_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (ItemsListBox.SelectedItem == null) return;
-
-            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
-            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "");
-            var selectedItem2 = Configuration.Instance.FileConfiguration.UrlBaseAddresst + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
-            //var selectedItem2 = ItemsListBox.SelectedItem;
-            if (selectedItem2 == null) return;
-
-            //var selectedItem = selectedItem2.ToString().CleanFileName().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "");
-            if (_dictionary.ContainsKey(selectedItem2))
+            try
             {
-                Container container;
-                var isHttpMessage = _dictionary.TryGetValue(selectedItem2, out container);
-                if (isHttpMessage)
+
+
+                if (ItemsListBox.SelectedItem == null) return;
+
+                var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+                var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").Replace(" (True)", "").Replace(" (False)", "").Replace(" (OK)", "").Replace(" (InternalServerError)", "").Replace(" (NotFound)", "");
+                var selectedItem2 = Configuration.Instance.FileConfiguration.UrlBaseAddress + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+                                                                                                            //var selectedItem2 = ItemsListBox.SelectedItem;
+                if (selectedItem2 == null) return;
+
+                //var selectedItem = selectedItem2.ToString().CleanFileName().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "");
+                if (_dictionary.ContainsKey(selectedItem2))
                 {
-                    var header = container.message.Headers.ToString();
-                    var returnedValue = container.message.Content.ReadAsStringAsync().Result;
-                    var contentHeader = container.message.Content.Headers.ToString();
-
-                    HeaderTextBox.Text = header;
-                    HeaderTextBox.Text += contentHeader;
-                    //return await;
-                    HtmlTextBox.Text = returnedValue;
-
-                    if (!string.IsNullOrWhiteSpace(returnedValue))
+                    Container container;
+                    var isHttpMessage = _dictionary.TryGetValue(selectedItem2, out container);
+                    if (isHttpMessage)
                     {
-                        WebBrowserHTML.NavigateToString(returnedValue);
+                        var header = container.message.Headers.ToString();
+                        var returnedValue = container.message.Content.ReadAsStringAsync().Result;
+                        var contentHeader = container.message.Content.Headers.ToString();
+
+                        HeaderTextBox.Text = header;
+                        HeaderTextBox.Text += contentHeader;
+                        //return await;
+                        HtmlTextBox.Text = returnedValue;
+
+                        if (!string.IsNullOrWhiteSpace(returnedValue))
+                        {
+                            WebBrowserHTML.NavigateToString(returnedValue);
+                        }
+                        else
+                        {
+                            WebBrowserHTML.Navigate("about:blank");
+                        }
                     }
+
+
                 }
-
-
+                else
+                {
+                    MessageBox.Show("Item not loaded yet!");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Item not loaded yet!");
+                MessageBox.Show(ex.Message);
             }
+        }
+
+        private void CheckContentMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            var selectedItem = ItemsListBox.SelectedItem.ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").CleanFileName();
+            var url = Configuration.Instance.FileConfiguration.UrlBaseAddress + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+            CheckStatus(url);
+
+            ItemsListBox.ItemsSource = null;
+            ItemsListBox.ItemsSource = Configuration.Instance.UrlFiles;
+        }
+
+        private void CheckUrlContentMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CheckUrlMenuItem_Click(sender, e);
+            CheckContentMenuItem_Click(sender, e);
+        }
+
+        private void CheckUrlReturnedMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var defaultFolder = Configuration.Instance.FileConfiguration.RootFolder.Replace("\\", "/");
+            var items = Configuration.Instance.UrlFiles.Where(s => !s.Contains("(OK)")).ToList();
+
+            var httpClient = new HttpClient();
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                var selectedItem = ItemsListBox.Items[i].ToString().Replace(defaultFolder, "").Replace("ASPWebsite/", "").Replace("ICE_Local/", "").CleanFileName();
+                var url = Configuration.Instance.FileConfiguration.UrlBaseAddress + selectedItem; //"https://cpt-icedev.datacash.co.za/" 
+
+                GetUrlResponse(url);
+
+            }
+        }
+
+        private void CopyListInClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            var text = string.Empty;
+            foreach (var item in Configuration.Instance.UrlFiles)
+            {
+                if (_dictionary.ContainsKey(item))
+                {
+                    text += item.CleanFileName() + Environment.NewLine;
+                }
+            }
+
+            Clipboard.SetText(text);
         }
     }
 

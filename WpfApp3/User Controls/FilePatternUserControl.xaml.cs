@@ -33,7 +33,7 @@ namespace WpfApp3
             {
                 DefaultFolderTextBox.Text = configuration.RootFolder;
                 DefaulFilterTextBox.Text = configuration.FilterPattern;
-                DefaultUrlTextBox.Text = configuration.UrlBaseAddresst;
+                DefaultUrlTextBox.Text = configuration.UrlBaseAddress;
                 IncludeSubFoldersCheckBox.IsChecked = configuration.IncludeSubFolders;
 
             }
@@ -50,7 +50,7 @@ namespace WpfApp3
 
                     RootFolder = DefaultFolderTextBox.Text,
                     FilterPattern = DefaulFilterTextBox.Text,
-                    UrlBaseAddresst = DefaultUrlTextBox.Text,
+                    UrlBaseAddress = DefaultUrlTextBox.Text,
                     IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
                 };
 
@@ -84,7 +84,7 @@ namespace WpfApp3
         {
             DefaultFolderTextBox.Text = Configuration.Instance.FileConfiguration.RootFolder;
             DefaulFilterTextBox.Text = Configuration.Instance.FileConfiguration.FilterPattern;
-            DefaultUrlTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddresst;
+            DefaultUrlTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddress;
             IncludeSubFoldersCheckBox.IsChecked = Configuration.Instance.FileConfiguration.IncludeSubFolders;
         }
     }

@@ -9,7 +9,7 @@ namespace WpfApp3
 
         public string FilterPattern { get; set; }
 
-        public string UrlBaseAddresst { get; set; }
+        public string UrlBaseAddress { get; set; }
 
         public bool IncludeSubFolders { get; set; }
     }

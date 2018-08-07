@@ -412,7 +412,7 @@ namespace WpfApp3
             {
                 RootFolder = RootFolderTextBox.Text,
                 FilterPattern = FilterPatternTextBox.Text,
-                UrlBaseAddresst = UrlBaseAddressTextBox.Text,
+                UrlBaseAddress = UrlBaseAddressTextBox.Text,
                 IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false
             };
 
@@ -547,7 +547,7 @@ namespace WpfApp3
 
             RootFolderTextBox.Text = Configuration.Instance.FileConfiguration.RootFolder;
             FilterPatternTextBox.Text = Configuration.Instance.FileConfiguration.FilterPattern;
-            UrlBaseAddressTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddresst;
+            UrlBaseAddressTextBox.Text = Configuration.Instance.FileConfiguration.UrlBaseAddress;
             IncludeSubFoldersCheckBox.IsChecked = Configuration.Instance.FileConfiguration.IncludeSubFolders;
 
             var persistence2 = new Persistence<FolderLoadingConfiguration>();
@@ -587,7 +587,7 @@ namespace WpfApp3
         {
             Configuration.Instance.FileConfiguration.RootFolder = RootFolderTextBox.Text;
             Configuration.Instance.FileConfiguration.FilterPattern = FilterPatternTextBox.Text;
-            Configuration.Instance.FileConfiguration.UrlBaseAddresst = UrlBaseAddressTextBox.Text;
+            Configuration.Instance.FileConfiguration.UrlBaseAddress = UrlBaseAddressTextBox.Text;
             Configuration.Instance.FileConfiguration.IncludeSubFolders = IncludeSubFoldersCheckBox?.IsChecked ?? false;
         }
     }
